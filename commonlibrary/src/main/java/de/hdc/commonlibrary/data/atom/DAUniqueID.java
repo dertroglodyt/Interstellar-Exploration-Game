@@ -1,4 +1,10 @@
 /*
+ *  Created by DerTroglodyt on 2016-11-08 13:49
+ *  Email dertroglodyt@gmail.com
+ *  Copyright by HDC, Germany
+ */
+
+/*
  * DVCdmUniqueID.java
  *
  * Created on 12. Oktober 2005, 13:13

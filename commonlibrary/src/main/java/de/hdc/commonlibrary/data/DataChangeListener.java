@@ -1,4 +1,10 @@
 /*
+ *  Created by DerTroglodyt on 2016-11-08 13:49
+ *  Email dertroglodyt@gmail.com
+ *  Copyright by HDC, Germany
+ */
+
+/*
  * DataChangeListener.java
  *
  * Created on 6. Mai 2005, 02:47

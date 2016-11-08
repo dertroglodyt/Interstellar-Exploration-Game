@@ -1,4 +1,10 @@
 /*
+ *  Created by DerTroglodyt on 2016-11-08 13:49
+ *  Email dertroglodyt@gmail.com
+ *  Copyright by HDC, Germany
+ */
+
+/*
  * DVCHex.java
  *
  * Created on 7. Januar 2005, 16:08
