@@ -1,4 +1,10 @@
 /*
+ *  Created by DerTroglodyt on 2016-11-10 09:27
+ *  Email dertroglodyt@gmail.com
+ *  Copyright by HDC, Germany
+ */
+
+/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -79,7 +85,7 @@ public class DAWareClass extends DataAtom {
         }
 
         public boolean isSmaller(Size s) {
-            return (vol.doCompare(s.vol) == -1);
+            return vol.isSmallerThan(s.vol);
         }
 
         public boolean isBiggerOrEqual(Size s) {
@@ -87,7 +93,7 @@ public class DAWareClass extends DataAtom {
         }
 
         public boolean isBiggerOrEqual(DAValue<Volume> v) {
-            return ! (vol.doCompare(v) == -1);
+            return ! vol.isSmallerThan(v);
         }
     }
     public static enum State {

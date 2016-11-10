@@ -1,4 +1,10 @@
 /*
+ *  Created by DerTroglodyt on 2016-11-10 09:27
+ *  Email dertroglodyt@gmail.com
+ *  Copyright by HDC, Germany
+ */
+
+/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -378,7 +384,7 @@ public abstract class DAMarket extends DataAtom { //implements IActionHandler {
 //                }
 //                DAOrder order = findSelling(so);
 //                if (order == null) {
-//                    return DAResult.createFailed("Could not find requested ware in selling list.", "DAMarket.buy");
+//                    return DAResult.createFailed("Could not find requested ware in selling ware.", "DAMarket.buy");
 //                }
 //                DAValue<Money> price = so.getPrice().scale(amount);
 //                DAMarketTransaction smt = DAMarketTransaction.createBill(owner, buyer, so.toString(), price);
@@ -504,7 +510,7 @@ public abstract class DAMarket extends DataAtom { //implements IActionHandler {
 //                }
 //                DAOrder w = findBuying(bo);
 //                if (w == null) {
-//                    return DAResult.createFailed("Could not find requested ware in buying list.", "DAMarket.sell");
+//                    return DAResult.createFailed("Could not find requested ware in buying ware.", "DAMarket.sell");
 //                }
 //                DAValue<Money> price = bo.getPrice().scale(x);
 //                DAMarketTransaction smt = DAMarketTransaction.createBill(seller, owner, bo.toString(), price);

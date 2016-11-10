@@ -1,4 +1,10 @@
 /*
+ *  Created by DerTroglodyt on 2016-11-10 09:27
+ *  Email dertroglodyt@gmail.com
+ *  Copyright by HDC, Germany
+ */
+
+/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -24,13 +30,20 @@ import de.hdc.commonlibrary.data.quantity.Pieces;
 import de.hdc.commonlibrary.util.Log;
 
 /**
- * Instance of a DAWareClass.
  * Holds instance variables of a ware (i.e. a module) if needed.
  * All invariant properties of this ware are held in the wareClass.
  * @author martin
  */
 //@SuppressWarnings("serial")
 public abstract class DAWare extends DataAtom implements IDAWare {
+
+    /**
+     * Used for deserialization. Class name to create instance of.
+     */
+    public enum SubType {
+        //DAWare, DABasicModule
+        DAShip
+    }
 
     @Deprecated
     public DAWare() {

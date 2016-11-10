@@ -32,7 +32,7 @@ public class DataChangeManager {
     /**
      * registers a listener to changes on the data of the object
      *
-     * @param listener Listener to be added to list.
+     * @param listener Listener to be added to ware.
      */
     public void addListener(DataChangeListener listener) {
         if (this.listener == null) {
@@ -44,7 +44,7 @@ public class DataChangeManager {
     /**
      * removes a listener to changes on the data of the object
      *
-     * @param listener Listener to be deleted from list.
+     * @param listener Listener to be deleted from ware.
      */
     public void removeListener(DataChangeListener listener) {
         if (this.listener == null) {

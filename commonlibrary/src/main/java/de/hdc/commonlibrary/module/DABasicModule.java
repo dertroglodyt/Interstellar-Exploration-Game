@@ -1,4 +1,10 @@
 /*
+ *  Created by DerTroglodyt on 2016-11-10 09:27
+ *  Email dertroglodyt@gmail.com
+ *  Copyright by HDC, Germany
+ */
+
+/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -33,10 +39,6 @@ import de.hdc.commonlibrary.util.Log;
  * @author martin
  */
 public abstract class DABasicModule extends DAModule implements IDAWare {
-
-    public enum SubType {
-        DABasicModule
-    }
 
     public enum State {
         /**
@@ -430,8 +432,6 @@ public abstract class DABasicModule extends DAModule implements IDAWare {
 
         return null;
     }
-
-    private final SubType SUB_TYPE = SubType.DABasicModule;
 
     private static final byte VERSION = 1;
 

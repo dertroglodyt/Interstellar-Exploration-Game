@@ -1,4 +1,10 @@
 /*
+ *  Created by DerTroglodyt on 2016-11-10 09:27
+ *  Email dertroglodyt@gmail.com
+ *  Copyright by HDC, Germany
+ */
+
+/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -33,5 +39,6 @@ public interface IDAWare extends IDataAtom {
     public DAValue<Pieces> getAmount();
     public boolean isUnique();
     public IDAWare makeUnique(DAText name);
+    public DAWare.SubType getSubType();
 
 }

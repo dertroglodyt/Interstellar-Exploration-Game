@@ -31,7 +31,6 @@ import de.hdc.commonlibrary.data.IDataAtom;
  * This should be an Immutable.
  *
  * @param <Q> Dimension of the unit.
- *
  * @author Martin
  */
 //@SuppressWarnings("serial")
@@ -126,7 +125,6 @@ public class DAValue<Q extends Quantity> extends DataAtom {
     }
 
     /**
-     *
      * @return 1 / value
      */
     public DAValue<? extends Quantity> inverse() {
@@ -134,7 +132,6 @@ public class DAValue<Q extends Quantity> extends DataAtom {
     }
 
     /**
-     *
      * @return -value
      */
     public DAValue<? extends Quantity> negate() {
@@ -162,7 +159,23 @@ public class DAValue<Q extends Quantity> extends DataAtom {
     }
 
     public boolean isZero() {
-        return (value.getValue().compareTo(BigDecimal.ZERO) == 0);
+        return (value.getValue().signum() == 0);
+    }
+
+    public boolean isNegativ() {
+        return (value.getValue().signum() == -1);
+    }
+
+    public boolean isPositiv() {
+        return (value.getValue().signum() == 1);
+    }
+
+    public boolean isGreaterThan(DAValue<Q> other) {
+        return (value.getValue().compareTo(other.value.getValue()) > 0);
+    }
+
+    public boolean isSmallerThan(DAValue<Q> other) {
+        return (value.getValue().compareTo(other.value.getValue()) < 0);
     }
 
     public int sign() {
@@ -214,5 +227,4 @@ public class DAValue<Q extends Quantity> extends DataAtom {
         super();
         this.value = new DecimalMeasure<Q>(value, unit);
     }
-
 }

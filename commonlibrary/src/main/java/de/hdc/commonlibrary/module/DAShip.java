@@ -1,4 +1,10 @@
 /*
+ *  Created by DerTroglodyt on 2016-11-10 09:27
+ *  Email dertroglodyt@gmail.com
+ *  Copyright by HDC, Germany
+ */
+
+/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -2239,7 +2245,7 @@ public class DAShip extends DAModuleContainer implements IDataChangeListener {
 //                    }
 //                    DAVector<DAbmWaresContainer> wc = (DAVector<DAbmWaresContainer>) parms.get(Parameters.CARGOLIST);
 //                    if (wc == null) {
-//                        return new DATypedResult<>("Wares list not found!",
+//                        return new DATypedResult<>("Wares ware not found!",
 //                            DAResult.ResultType.FAILED, pl, "DAShip.handle");
 //                    }
 //                    DAResult r = transferCargo(wc, stoFromID, stoToID, ts);
@@ -2687,7 +2693,7 @@ public class DAShip extends DAModuleContainer implements IDataChangeListener {
 //    }
 //
 //    /**
-//     * Removes all container on list from this storage.
+//     * Removes all container on ware from this storage.
 //     * If not all container can be removed the returned vector holds the containers already removed on return.
 //     * @param passengers
 //     * @return
