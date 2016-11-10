@@ -1,5 +1,3 @@
-
-
 /*
  *  Created by DerTroglodyt on 2016-11-08 13:46
  *  Email dertroglodyt@gmail.com
@@ -8,22 +6,16 @@
 
 package de.hdc.commonlibrary.module;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.Iterator;
+import java.util.ArrayList;
 
 import javax.measure.quantity.Duration;
 import javax.measure.quantity.Energy;
-import javax.measure.quantity.Mass;
 import javax.measure.unit.SI;
 
-import de.hdc.commonlibrary.data.atom.DADateTime;
-import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DAValue;
-import de.hdc.commonlibrary.data.atom.DAVector;
+import de.hdc.commonlibrary.market.DAWare;
 import de.hdc.commonlibrary.market.DAWareClass;
-import de.hdc.commonlibrary.moduleclass.DABasicModuleClass;
+import de.hdc.commonlibrary.market.DAWareClassMap;
 
 /**
  * Entity (like a ship or a station) that contains modules.
@@ -33,8 +25,6 @@ import de.hdc.commonlibrary.moduleclass.DABasicModuleClass;
  */
 @SuppressWarnings("serial")
 public class DAModuleContainer extends DABasicModule {
-
-    private static final long serialVersionUID = SerialUID.DAModuleContainer.value();
 
 //    static {
 //        DVCBasicDataModel.register(DAModuleContainer.class, createImageIcon("/datavault/common/space/icon/DAModuleContainer.gif"));
@@ -46,122 +36,51 @@ public class DAModuleContainer extends DABasicModule {
      */
     protected transient final DAValue<Energy> actEnergy;
     protected transient final DAGoodFlowList combinedGoodFlows;
-    protected transient final DAVector<DABasicModule> allModules;
-    protected transient final DAVector<DAbmPropulsion> engines;
-    protected transient final DAVector<DAbmStorage> storages;
-    protected transient final DAVector<DAbmRentableStorage> rentStorages;
-    protected transient final DAVector<DAbmHangar> hangars;
-    protected transient final DAVector<DAbmWeapon> weapons;
-    protected transient final DAVector<DAAbstractTank> tanks;
-    protected transient final DAVector<DAbmFactory> factories;
+    protected transient final ArrayList<DABasicModule> allModules;
+//    protected transient final DAVector<DAbmPropulsion> engines;
+//    protected transient final DAVector<DAbmStorage> storages;
+//    protected transient final DAVector<DAbmRentableStorage> rentStorages;
+//    protected transient final DAVector<DAbmHangar> hangars;
+//    protected transient final DAVector<DAbmWeapon> weapons;
+    protected transient final ArrayList<DAAbstractTank> tanks;
+//    protected transient final DAVector<DAbmFactory> factories;
 
     private transient final TankPool tankPool;
-//    private transient final HashSet<IDVCRemoteDataModel> remoteListener;
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        super.readExternal(in);
-        byte version = in.readByte();
-        // Do something different here if old version demands it
-
-        if ((version < 1) || (version > 1)) {
-            throw new IOException("readExternal: Unknown version number <" + version + ">.");
-        }
-        Iterator<ITreeNode> i = childIterator();
-        while (i.hasNext()) {
-            ITreeNode n = i.next();
-            if (n instanceof DABasicModule) {
-                allModules.add((DABasicModule) n);
-            }
-        }
-//        try {
-//            tempMods = new DAVector<>(DABasicModule.class);
-//            tempMods.readExternal(in);
-////            for (DABasicModule m : tempMods) {
-////                addModule(m);
-////            }
-////            tempMods = null;
-////            internalRecalc();
-//        } catch (IOException | ClassNotFoundException t) {
-//            DVCErrorHandler.raiseError(DAResult.createSerious(t.toString(), "DAModuleContainer.readExternal"));
-//        }
-        internalRecalc();
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        super.writeExternal(out);
-        /**
-         * The version number of the class to help distinguish changed read/write data formats.
-         * It should be set in every "writeExternal" of every class.
-         * It's value should only change if write-/readExternal are changed.
-         */
-        byte version = 1;
-        out.writeByte(version);
-
-//            modules.writeExternal(out);
-    }
 
     @Deprecated
     public DAModuleContainer() {
         super();
-        actEnergy = new DAValue<Energy>(0, SI.JOULE);
-        combinedGoodFlows = new DAGoodFlowList();
-//            combinedGoodFlows.set(DAResourcePool.ELECTRICAL_POWER, new DAPVEnergy(0, DAUnit.KnownUnit.J));
-        allModules = new DAVector<DABasicModule>(DABasicModule.class);
-        engines = new DAVector<DAbmPropulsion>(DAbmPropulsion.class);
-        storages = new DAVector<DAbmStorage>(DAbmStorage.class);
-        rentStorages = new DAVector<DAbmRentableStorage>(DAbmRentableStorage.class);
-        hangars = new DAVector<DAbmHangar>(DAbmHangar.class);
-        weapons = new DAVector<DAbmWeapon>(DAbmWeapon.class);
-        tanks = new DAVector<DAAbstractTank>(DAAbstractTank.class);
-        factories = new DAVector<DAbmFactory>(DAbmFactory.class);
-        tankPool = new TankPool();
-
-//            remoteListener = new HashSet<IDVCRemoteDataModel>(0);
+        actEnergy = null;
+        combinedGoodFlows = null;
+        allModules = null;
+        tanks = null;
+        tankPool = null;
     }
-
-    public DAModuleContainer(DABasicModuleClass aWareClass, DATransform trans) {
-        super(aWareClass, trans);
-        actEnergy = new DAValue<Energy>(0, SI.JOULE);
-        combinedGoodFlows = new DAGoodFlowList();
-//            combinedGoodFlows.set(DAResourcePool.ELECTRICAL_POWER, new DAPVEnergy(0, DAUnit.KnownUnit.J));
-        allModules = new DAVector<DABasicModule>(DABasicModule.class);
-        engines = new DAVector<DAbmPropulsion>(DAbmPropulsion.class);
-        storages = new DAVector<DAbmStorage>(DAbmStorage.class);
-        rentStorages = new DAVector<DAbmRentableStorage>(DAbmRentableStorage.class);
-        hangars = new DAVector<DAbmHangar>(DAbmHangar.class);
-        weapons = new DAVector<DAbmWeapon>(DAbmWeapon.class);
-        tanks = new DAVector<DAAbstractTank>(DAAbstractTank.class);
-        factories = new DAVector<DAbmFactory>(DAbmFactory.class);
-        tankPool = new TankPool();
-
-//        remoteListener = new HashSet<IDVCRemoteDataModel>(0);
-    }
+//    public DAModuleContainer(DABasicModuleClass aWareClass) {
+//        super(aWareClass);
+//        actEnergy = new DAValue<Energy>(0, SI.JOULE);
+//        combinedGoodFlows = new DAGoodFlowList();
+////            combinedGoodFlows.set(DAResourcePool.ELECTRICAL_POWER, new DAPVEnergy(0, DAUnit.KnownUnit.J));
+//        allModules = new ArrayList<DABasicModule>();
+////        engines = new DAVector<DAbmPropulsion>(DAbmPropulsion.class);
+////        storages = new DAVector<DAbmStorage>(DAbmStorage.class);
+////        rentStorages = new DAVector<DAbmRentableStorage>(DAbmRentableStorage.class);
+////        hangars = new DAVector<DAbmHangar>(DAbmHangar.class);
+////        weapons = new DAVector<DAbmWeapon>(DAbmWeapon.class);
+//        tanks = new ArrayList<DAAbstractTank>();
+////        factories = new DAVector<DAbmFactory>(DAbmFactory.class);
+//        tankPool = new TankPool();
+//
+////        remoteListener = new HashSet<IDVCRemoteDataModel>(0);
+//    }
 
     @Override
-    public void init() {
-        super.init();
-//            // TODO BUG STARFORTRESS-11
-//            if (tempMods != null) {
-//                Iterator<DABasicModule> i = tempMods.iterator();
-//                while (i.hasNext()) {
-//                    DABasicModule m = i.next();
-//                    addModule(m);
-//    //                DVCErrorHandler.createDebug("Module: " + m, "DAModuleContainer.resolve");
-////                    m.resolve(lvl+1);
-////                    i.remove();
-//                }
-//            }
+    public void init(DAWareClassMap map, DABasicModule parent) {
+        super.init(map, parent);
         for (DABasicModule bm : allModules) {
-            bm.init();
+            bm.init(map, this);
         }
     }
-
-//    @Override
-//    public DAWare clone() {
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
 
 //    private static void calcInertia(DAModuleContainer mc, Vector3d v, Vector3d v2) {
 //        //Vector3d p1 = new Vector3d();
@@ -276,7 +195,6 @@ public class DAModuleContainer extends DABasicModule {
 //                m.makeUnique(DAWare.NOT_NAMED);
 //            }
         allModules.add(m);
-        super.add(m);
 //            if (isGraficsInit()) {
 //                m.addToTrans(physical.getTransform());
 ////                physical.addGraficNode(m.getGraficNode());
@@ -288,36 +206,34 @@ public class DAModuleContainer extends DABasicModule {
         if (m.isOnline()) {
             actEnergy.add(m.getOnlinePower());
         }
-//            combinedGoodFlows.add(m.getGoodFlows());
-        if (m instanceof DAbmPropulsion) {
-            engines.add((DAbmPropulsion) m);
-        }
-        if (m instanceof DAbmStorage) {
-            storages.add((DAbmStorage) m);
-        }
-        if (m instanceof DAbmRentableStorage) {
-            rentStorages.add((DAbmRentableStorage) m);
-        }
-        if (m instanceof DAbmHangar) {
-            hangars.add((DAbmHangar) m);
-        }
-        if (m instanceof DAbmWeapon) {
-            weapons.add((DAbmWeapon) m);
-        }
-        if (m instanceof DAAbstractTank) {
-            tanks.add((DAAbstractTank) m);
-            tankPool.add((DAAbstractTank) m);
-        }
-        if (m instanceof DAbmFactory) {
-            factories.add((DAbmFactory) m);
-        }
+////            combinedGoodFlows.add(m.getGoodFlows());
+//        if (m instanceof DAbmPropulsion) {
+//            engines.add((DAbmPropulsion) m);
+//        }
+//        if (m instanceof DAbmStorage) {
+//            storages.add((DAbmStorage) m);
+//        }
+//        if (m instanceof DAbmRentableStorage) {
+//            rentStorages.add((DAbmRentableStorage) m);
+//        }
+//        if (m instanceof DAbmHangar) {
+//            hangars.add((DAbmHangar) m);
+//        }
+//        if (m instanceof DAbmWeapon) {
+//            weapons.add((DAbmWeapon) m);
+//        }
+//        if (m instanceof DAAbstractTank) {
+//            tanks.add((DAAbstractTank) m);
+//            tankPool.add((DAAbstractTank) m);
+//        }
+//        if (m instanceof DAbmFactory) {
+//            factories.add((DAbmFactory) m);
+//        }
         internalRecalc();
-        notifyListener(this);
     }
 
     public void removeModule(DABasicModule m) {
         allModules.remove(m);
-        super.remove(m);
 //            m.addToTrans(physical.getTransform());
 //            physical.removeGraficNode(m.getGraficNode());
         //mass.subtract(m.getMassInternal());
@@ -326,116 +242,89 @@ public class DAModuleContainer extends DABasicModule {
         if (m.isOnline()) {
             actEnergy.sub(m.getOnlinePower());
         }
-//            combinedGoodFlows.subtract(m.getGoodFlows());
-        if (m instanceof DAbmPropulsion) {
-            engines.remove((DAbmPropulsion) m);
-        }
-        if (m instanceof DAbmStorage) {
-            storages.remove((DAbmStorage) m);
-        }
-        if (m instanceof DAbmRentableStorage) {
-            rentStorages.remove((DAbmRentableStorage) m);
-        }
-        if (m instanceof DAbmHangar) {
-            hangars.remove((DAbmHangar) m);
-        }
-        if (m instanceof DAbmWeapon) {
-            weapons.remove((DAbmWeapon) m);
-        }
-        if (m instanceof DAAbstractTank) {
-            tanks.remove((DAAbstractTank) m);
-            tankPool.remove((DAAbstractTank) m);
-        }
-        if (m instanceof DAbmFactory) {
-            factories.remove((DAbmFactory) m);
-        }
+////            combinedGoodFlows.subtract(m.getGoodFlows());
+//        if (m instanceof DAbmPropulsion) {
+//            engines.remove((DAbmPropulsion) m);
+//        }
+//        if (m instanceof DAbmStorage) {
+//            storages.remove((DAbmStorage) m);
+//        }
+//        if (m instanceof DAbmRentableStorage) {
+//            rentStorages.remove((DAbmRentableStorage) m);
+//        }
+//        if (m instanceof DAbmHangar) {
+//            hangars.remove((DAbmHangar) m);
+//        }
+//        if (m instanceof DAbmWeapon) {
+//            weapons.remove((DAbmWeapon) m);
+//        }
+//        if (m instanceof DAAbstractTank) {
+//            tanks.remove((DAAbstractTank) m);
+//            tankPool.remove((DAAbstractTank) m, typeID);
+//        }
+//        if (m instanceof DAbmFactory) {
+//            factories.remove((DAbmFactory) m);
+//        }
         internalRecalc();
-        notifyListener(this);
     }
 
-//    public void showBoundingBox(boolean visible) {
-//        for (DABasicModule m : modules) {
-//            m.getObjectGroup().showBoundingBox(visible);
-//        }
-//        getObjectGroup().showBoundingBox(visible);
-//    }
-//
-//    public void showMassCenter(boolean visible) {
-//        for (DABasicModule m : modules) {
-//            m.getObjectGroup().showMassCenter(visible);
-//        }
-//        getObjectGroup().showMassCenter(visible);
-//    }
-
-//    public void setHullVisible(boolean visible) {
-//        classGeometry.removeTemp(TempObjects.SHIP_HULL);
-//        if (visible) {
-//            double f = 5.0;
-//            double x = ((DAShipClass) wareClass).getType().getSmallSide(f);
-//            DA3DObject box = DA3DObject.createBox(f*x, x, x, StandardMaterial.Tactical3.getItemID());
-//            box.setName(new DALine("ship hull"));
-//    //        box.setTexture(DATextureFactory.getDefaultTexture(DefaultTexture.IO));
-//            classGeometry.addTemp(TempObjects.SHIP_HULL, box);
-//        }
-//    }
-
-    public DAVector<DABasicModule> getModules() {
+    public ArrayList<DABasicModule> getModules() {
         return allModules;
     }
 
-    public DABasicModule getModule(DAUniqueID id) {
-        for (DABasicModule bm : allModules) {
-            if (bm.getItemID().equals(id)) {
-                return bm;
-            }
-            if (bm instanceof DAbmRentableStorage) {
-                DAbmStorage s = ((DAbmRentableStorage) bm).getStorageByModuleID(id);
-                if (s != null) {
-                    return s;
-                }
-            }
-        }
-        return null;
-    }
+//    public DABasicModule getModule(DAUniqueID id) {
+//        for (DABasicModule bm : allModules) {
+//            if (bm.getItemID().equals(id)) {
+//                return bm;
+//            }
+//            if (bm instanceof DAbmRentableStorage) {
+//                DAbmStorage s = ((DAbmRentableStorage) bm).getStorageByModuleID(id);
+//                if (s != null) {
+//                    return s;
+//                }
+//            }
+//        }
+//        return null;
+//    }
+//
+//    public DAbmWaresContainer getContainer(DAUniqueID id) {
+//        for (DAbmStorage sto : getStorages()) {
+//            for (DAbmWaresContainer wc : sto.getContainers()) {
+//                if (wc.getItemID().equals(id)) {
+//                    return wc;
+//                }
+//            }
+//        }
+//        return null;
+//    }
 
-    public DAbmWaresContainer getContainer(DAUniqueID id) {
-        for (DAbmStorage sto : getStorages()) {
-            for (DAbmWaresContainer wc : sto.getContainers()) {
-                if (wc.getItemID().equals(id)) {
-                    return wc;
-                }
-            }
-        }
-        return null;
-    }
+//    public ArrayList<DAbmPropulsion> getEngines() {
+//        return engines;
+//    }
+//
+//    public ArrayList<DAbmStorage> getStorages() {
+//        return storages;
+//    }
+//
+//    public ArrayList<DAbmRentableStorage> getRentableStorages() {
+//        return rentStorages;
+//    }
+//
+//    public ArrayList<DAbmHangar> getHangars() {
+//        return hangars;
+//    }
+//
+//    public ArrayList<DAbmWeapon> getWeapons() {
+//        return weapons;
+//    }
 
-    public DAVector<DAbmPropulsion> getEngines() {
-        return engines;
-    }
-
-    public DAVector<DAbmStorage> getStorages() {
-        return storages;
-    }
-
-    public DAVector<DAbmRentableStorage> getRentableStorages() {
-        return rentStorages;
-    }
-
-    public DAVector<DAbmHangar> getHangars() {
-        return hangars;
-    }
-
-    public DAVector<DAbmWeapon> getWeapons() {
-        return weapons;
-    }
-
-    public DAVector<DAAbstractTank> getTanks() {
+    public ArrayList<DAAbstractTank> getTanks() {
         return tanks;
     }
 
-    public DAVector<DAbmFactory> getFactories() {
-        return factories;
-    }
+//    public ArrayList<DAbmFactory> getFactories() {
+//        return factories;
+//    }
 
     public TankPool getTankPool() {
         return tankPool;
@@ -446,22 +335,23 @@ public class DAModuleContainer extends DABasicModule {
         if (isOnline()) {
             return actEnergy;
         } else {
-            return new DAValue<Energy>(0, SI.JOULE);
+            return DAValue.<Energy>create(0, SI.JOULE);
         }
     }
 
     @Override
     public DAValue<Energy> getOnlinePower() {
-        DAGoodFlow gf = combinedGoodFlows.get(AssetPool.AssetNameWareClass.ElectricalPower.getWareClass());
+        DAGoodFlow gf = combinedGoodFlows.get(DAWareClass.ELECTRICAL_POWER);
         if (gf == null) {
-            combinedGoodFlows.set(AssetPool.AssetNameWareClass.ElectricalPower.getWareClass(), new DAValue<Energy>(0, SI.JOULE));
+            gf = DAGoodFlow.create(DAWareClass.ELECTRICAL_POWER.id, DAValue.<Energy>create(0, SI.JOULE));
+            combinedGoodFlows.set(DAWareClass.ELECTRICAL_POWER, gf);
         }
-        return (DAValue<Energy>) gf.getFlow();
+        return (DAValue<Energy>) gf.flow;
     }
 
     @Override
     public DAValue<Energy> getMaxHitpoints() {
-        return wareClass.getMaxHitpoints();
+        return getWareClass().maxHitPoints;
     }
 
     @Override
@@ -474,14 +364,14 @@ public class DAModuleContainer extends DABasicModule {
         return combinedGoodFlows;
     }
 
-    @Override
-    public DAValue<Mass> getTotalMass() {
-        DAValue<Mass> m = getTotalMass();
-        for (DABasicModule bm : allModules) {
-            m = m.add(bm.getTotalMass());
-        }
-        return m;
-    }
+//    @Override
+//    public DAValue<Mass> getTotalMass() {
+//        DAValue<Mass> m = getTotalMass();
+//        for (DABasicModule bm : allModules) {
+//            m = m.add(bm.getTotalMass());
+//        }
+//        return m;
+//    }
 
 //    @Override
 //    public DVCDataEditor getEditor(DVCDataEditor.EditMode editmode, DVCAbstractUser user, boolean visible) {
@@ -490,17 +380,17 @@ public class DAModuleContainer extends DABasicModule {
 //        return de;
 //    }
 
-    @Override
-    public void longTick(DADateTime actWorldTime, DAValue<Duration> t) {
-        super.longTick(actWorldTime, t);
-        for (DABasicModule bm : allModules) {
-            bm.longTick(actWorldTime, t);
-        }
-        for (DABasicModule bm : allModules) {
-            bm.longTickNotify();
-        }
-        internalRecalc();
-    }
+//    @Override
+//    public void longTick(DADateTime actWorldTime, DAValue<Duration> t) {
+//        super.longTick(actWorldTime, t);
+//        for (DABasicModule bm : allModules) {
+//            bm.longTick(actWorldTime, t);
+//        }
+//        for (DABasicModule bm : allModules) {
+//            bm.longTickNotify();
+//        }
+//        internalRecalc();
+//    }
 
     public void preTick(DAValue<Duration> t) {
         // TODO
@@ -657,5 +547,10 @@ public class DAModuleContainer extends DABasicModule {
 ////        s.resolve(worldNode);
 //        return s;
 //    }
+
+    @Override
+    public DAWare.SubType getSubType() {
+        return null;
+    }
 
 }

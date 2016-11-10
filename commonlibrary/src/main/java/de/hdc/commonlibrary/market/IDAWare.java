@@ -31,7 +31,6 @@ public interface IDAWare extends IDataAtom {
     public DAUniqueID getClassID();
     public DAUniqueID getItemID();
     public DAText getName();
-    public IDAWare setName(DAText newName);
     public DAWareClass getWareClass();
     public DAValue<Mass> getMass();
     public Unit<?> getUnit();

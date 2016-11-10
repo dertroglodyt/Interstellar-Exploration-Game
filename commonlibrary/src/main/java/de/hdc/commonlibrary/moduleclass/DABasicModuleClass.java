@@ -1,4 +1,10 @@
 /*
+ *  Created by DerTroglodyt on 2016-11-10 10:32
+ *  Email dertroglodyt@gmail.com
+ *  Copyright by HDC, Germany
+ */
+
+/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -77,7 +83,7 @@ public class DABasicModuleClass extends DAWareClass {
     }
 
     public DAValue<Energy> getOnlinePower() {
-        DAValue<Energy> f = (DAValue<Energy>) getGoodFlow(DAWareClass.ELCTRICAL_POWER).flow;
+        DAValue<Energy> f = (DAValue<Energy>) getGoodFlow(DAWareClass.ELECTRICAL_POWER).flow;
         if (f == null) {
             f = DAValue.<Energy>create(0, SI.JOULE);
         }

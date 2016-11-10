@@ -42,7 +42,7 @@ public abstract class DAWare extends DataAtom implements IDAWare {
      */
     public enum SubType {
         //DAWare, DABasicModule
-        DAShip
+        DAShip, DAWaresContainer,
     }
 
     @Deprecated
@@ -87,9 +87,6 @@ public abstract class DAWare extends DataAtom implements IDAWare {
     public DAText getName() {
         return itemName;
     }
-
-    @Override
-    public abstract DAWare setName(DAText newName);
 
     @Override
     public boolean isUnique() {

@@ -33,7 +33,7 @@ import de.hdc.commonlibrary.data.atom.DataAtom;
  */
 public class DAWareClass extends DataAtom {
 
-    public static final DAWareClass ELCTRICAL_POWER = new DAWareClass(
+    public static final DAWareClass ELECTRICAL_POWER = new DAWareClass(
             DAUniqueID.parse("00000000000000000000000000000001")
             , DAText.create("Electrical Power"), DAText.create("Needs description"), Size.NONE
             , State.PUBLIC, SI.JOULE, DAValue.<Mass>create(0, SI.KILOGRAM), DAValue.<Volume>create(0, SI.CUBIC_METRE)

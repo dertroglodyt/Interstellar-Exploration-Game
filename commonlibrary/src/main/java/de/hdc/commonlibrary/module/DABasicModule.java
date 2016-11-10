@@ -362,11 +362,6 @@ public abstract class DABasicModule extends DAModule implements IDAWare {
         return wareClass.name;
     }
 
-//    @Override
-//    public IDAWare setName(DAText newName) {
-//        return new DAB;
-//    }
-
     @Override
     public DABasicModuleClass getWareClass() {
         return wareClass;
