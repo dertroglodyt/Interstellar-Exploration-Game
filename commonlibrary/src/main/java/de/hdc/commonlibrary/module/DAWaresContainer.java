@@ -14,11 +14,14 @@ package de.hdc.commonlibrary.module;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.quantity.Pieces;
 import de.hdc.commonlibrary.market.DAWare;
 import de.hdc.commonlibrary.market.DAWareClass;
+import de.hdc.commonlibrary.market.DAWareClassMap;
 import de.hdc.commonlibrary.market.IDAWare;
 
 /**
@@ -33,6 +36,44 @@ public class DAWaresContainer extends DABasicModule {
         super();
         content = null;
     }
+
+    @Override
+    public void init(DAWareClassMap map) {
+        content.init(map);
+    }
+
+    /**
+     * Compacts the contained wares of a list of containers into a single list of unique wares.
+     *
+     * @param conti Container list.
+     * @return Compiled list of wares.
+     */
+    public static ArrayList<IDAWare> toWareList(List<DAWaresContainer> conti) {
+        ArrayList<IDAWare> v = new ArrayList<>(conti.size());
+        for (DAWaresContainer wc : conti) {
+            IDAWare wa = wc.content;
+            if ((wa != null) && (wa.getAmount().isPositiv())) {
+                boolean done = false;
+                for (IDAWare a : v) {
+                    if (a.equals(wa)) {
+                        a.add(wa.getAmount());
+                        done = true;
+                        break;
+                    }
+                }
+                if (! done) {
+                    v.add(wa);
+                }
+            }
+        }
+        return v;
+    }
+
+    public DAWaresContainer(IDAWare content) {
+        super();
+        this.content = content;
+    }
+
 
 //    public DAWaresContainer(IDAWare ware, int aAmount, DABasicModuleClass aContainerClass, DATransform trans) {
 //        super(aContainerClass, trans);
@@ -75,12 +116,13 @@ public class DAWaresContainer extends DABasicModule {
 //        content = content.add(w.getAmount());
 //        return DAResult.createOK("ok", "DABMWaresContainer.add");
 //    }
-//
-//    public DAResult<?> add(IDAWare w, DAValue<Pieces> x) {
-//        return add(new DAWareAmount(w, x));
-//    }
-//
-//    public DAResult<?> sub(DAValue<Pieces> w) {
+
+    @Override
+    public boolean add(DAValue<Pieces> x) {
+        return content.add(x);
+    }
+
+//    public DAResult<?> sub(DAValue<Pieces> x) {
 //        if (!w.getWare().equals(content.getWare())) {
 //            return DAResult.createWarning("Wares do not match.", "DABMWaresContainer.add");
 //        }
@@ -90,10 +132,11 @@ public class DAWaresContainer extends DABasicModule {
 //        content = content.sub(w.getAmount());
 //        return DAResult.createOK("ok", "DABMWaresContainer.sub");
 //    }
-//
-//    public  DAResult<?> sub(IDAWare w, DAValue<Pieces> x) {
-//        return sub(new DAWareAmount(w, x));
-//    }
+
+    @Override
+    public boolean sub(DAValue<Pieces> x) {
+        return content.sub(x);
+    }
 
 //    /**
 //     * Takes ware and packages it into containers.
@@ -241,9 +284,10 @@ public class DAWaresContainer extends DABasicModule {
         if (v < 1) {
             throw new IllegalArgumentException("Invalid version number " + v);
         }
+        IDAWare acontent = null;
         try {
             Class<?> c = Class.forName(stream.readUTF());
-            content = (IDAWare) ((IDAWare) c.newInstance()).fromStream(stream);
+            acontent = (IDAWare) ((IDAWare) c.newInstance()).fromStream(stream);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
@@ -252,11 +296,12 @@ public class DAWaresContainer extends DABasicModule {
             e.printStackTrace();
         }
 
-        return null;
+        //todo
+        return new DAWaresContainer(acontent);
     }
 
     private static final byte VERSION = 1;
 
-    private IDAWare content;
+    private final IDAWare content;
 
 }

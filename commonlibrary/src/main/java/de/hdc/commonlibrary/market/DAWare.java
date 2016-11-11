@@ -32,35 +32,38 @@ import de.hdc.commonlibrary.util.Log;
 /**
  * Holds instance variables of a ware (i.e. a module) if needed.
  * All invariant properties of this ware are held in the wareClass.
+ *
+ * 'add' and 'sub' make this class into non-immutable!
+ *
  * @author martin
  */
 //@SuppressWarnings("serial")
-public abstract class DAWare extends DataAtom implements IDAWare {
+public class DAWare extends DataAtom implements IDAWare {
 
     /**
      * Used for deserialization. Class name to create instance of.
      */
     public enum SubType {
-        //DAWare, DABasicModule
-        DAShip, DAWaresContainer,
+        //DABasicModule
+        DAWare, DAShip, DAWaresContainer,
     }
 
     @Deprecated
     public DAWare() {
         classID = null;
         itemID = null;
-        itemName = null;
+        name = null;
         amount = null;
     }
+    public static DAWare create(DAWareClass wareClass, DAValue<Pieces> amount) {
+        return new DAWare(wareClass.id, null, DAText.create(""), amount);
+    }
 
-//    public static DAWare create(DAWareClass wareClass) {
-//        return new DAWare(wareClass.id, null, DAText.create(""));
-//    }
+    public static DAWare createUnique(DAWareClass aWareClass, DAText name, DAValue<Pieces> amount) {
+        return new DAWare(aWareClass.id, DAUniqueID.createRandom(), name, amount);
+    }
 
-//    public static DAWare createUnique(DAWareClass aWareClass, DAText name) {
-//        return new DAWare(aWareClass.id, DAUniqueID.createRandom(), name);
-//    }
-
+    @Override
     public void init(DAWareClassMap map) {
         wareClass = map.get(classID);
         if (wareClass == null) {
@@ -70,7 +73,15 @@ public abstract class DAWare extends DataAtom implements IDAWare {
 
     @Override
     public String toString() {
-        return (isUnique()?itemName + " (" : "") + classID + (isUnique()?" : )" + itemID : "");
+        return (isUnique()? name + " (" : "") + classID + (isUnique()?" : )" + itemID : "");
+    }
+
+    @Override
+    public int doCompare(IDataAtom o) {
+        if (itemID != null) {
+            return itemID.compareTo(((DAWare) o).itemID);
+        }
+        return classID.compareTo(((DAWare) o).classID);
     }
 
     @Override
@@ -85,7 +96,7 @@ public abstract class DAWare extends DataAtom implements IDAWare {
 
     @Override
     public DAText getName() {
-        return itemName;
+        return name;
     }
 
     @Override
@@ -94,14 +105,13 @@ public abstract class DAWare extends DataAtom implements IDAWare {
     }
 
     @Override
-    public abstract DAWare makeUnique(DAText name);
-//    {
-//        if (isUnique()) {
-//            Log.warn(DAWareClass.class, "makeUnique: Ware is already unique!");
-//            return this;
-//        }
-//        return new DAWare(classID, DAUniqueID.createRandom(), name);
-//    }
+    public DAWare makeUnique(DAText name) {
+        if (isUnique()) {
+            Log.warn(DAWareClass.class, "makeUnique: Ware is already unique!");
+            return this;
+        }
+        return new DAWare(classID, DAUniqueID.createRandom(), name, amount);
+    }
 
     @Override
     public DAWareClass getWareClass() {
@@ -129,11 +139,8 @@ public abstract class DAWare extends DataAtom implements IDAWare {
     }
 
     @Override
-    public int doCompare(IDataAtom o) {
-        if (itemID != null) {
-            return itemID.compareTo(((DAWare) o).itemID);
-        }
-        return classID.compareTo(((DAWare) o).classID);
+    public SubType getSubType() {
+        return SubType.DAWare;
     }
 
     @Override
@@ -144,7 +151,7 @@ public abstract class DAWare extends DataAtom implements IDAWare {
         stream.writeBoolean((itemID == null));
         if (itemID != null) {
             itemID.toStream(stream);
-            itemName.toStream(stream);
+            name.toStream(stream);
         }
         amount.toStream(stream);
     }
@@ -158,38 +165,19 @@ public abstract class DAWare extends DataAtom implements IDAWare {
         if (v < 1) {
             throw new IllegalArgumentException("Invalid version number " + v);
         }
-        classID = new DAUniqueID().fromStream(stream);
-        DAUniqueID itemID = null;
-        DAText itemName = null;
+        final DAUniqueID aclassID = new DAUniqueID().fromStream(stream);
+        DAUniqueID aitemID = null;
+        DAText aitemName = null;
         if (stream.readBoolean()) {
-            itemID = new DAUniqueID().fromStream(stream);
-            itemName = new DAText().fromStream(stream);
+            aitemID = new DAUniqueID().fromStream(stream);
+            aitemName = new DAText().fromStream(stream);
         }
+        final DAValue<Pieces> aamount = new DAValue<Pieces>().fromStream(stream);
 
-        return null;
+        return new DAWare(aclassID, aitemID, aitemName, aamount);
     }
 
-    //    public static ArrayList<DAWareAmount> toAmountList(DAVector<DAbmWaresContainer> conti) {
-//        ArrayList<DAWareAmount> v = new DAVector<DAWareAmount>(DAWareAmount.class);
-//        for (DAbmWaresContainer wc : conti) {
-//            DAWareAmount wa = wc.getContent();
-//            if ((wa != null) && (wa.amount.doubleValue(Pieces.UNIT) > 0)) {
-//                boolean done = false;
-//                for (DAWareAmount a : v) {
-//                    if (a.ware.equals(wa.ware)) {
-//                        a.add(wa.amount);
-//                        done = true;
-//                        break;
-//                    }
-//                }
-//                if (! done) {
-//                    v.add(wa);
-//                }
-//            }
-//        }
-//        return v;
-//    }
-
+    @Override
     public boolean add(DAValue<Pieces> value) {
         try {
             if (isUnique()) {
@@ -207,6 +195,7 @@ public abstract class DAWare extends DataAtom implements IDAWare {
         }
     }
 
+    @Override
     public boolean sub(DAValue<Pieces> value) {
         try {
             if (isUnique()) {
@@ -224,11 +213,11 @@ public abstract class DAWare extends DataAtom implements IDAWare {
         }
     }
 
-    protected DAWare(DAUniqueID wareClassID, DAUniqueID itemID, DAText name, DAValue<Pieces> amount) {
+    private DAWare(DAUniqueID wareClassID, DAUniqueID itemID, DAText name, DAValue<Pieces> amount) {
         super();
         this.classID = wareClassID;
         this.itemID = itemID;
-        this.itemName = name;
+        this.name = name;
         this.amount = amount;
         if (isUnique() && (amount.doubleValue(NewUnits.PIECES) != 1.0)) {
             Log.warn(DAWare.class, "Amount != 1 of unique ware not allowed!");
@@ -249,7 +238,7 @@ public abstract class DAWare extends DataAtom implements IDAWare {
     /**
      * Unique items have a name.
      */
-    private DAText itemName;
+    private DAText name;
     /**
      * Gets populated by init().
      * Init() needs to be called after deserialization and Constructor.

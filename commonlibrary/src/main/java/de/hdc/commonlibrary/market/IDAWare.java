@@ -11,6 +11,9 @@
 
 package de.hdc.commonlibrary.market;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.measure.quantity.Mass;
 import javax.measure.quantity.Volume;
 import javax.measure.unit.Unit;
@@ -20,6 +23,7 @@ import de.hdc.commonlibrary.data.atom.DAText;
 import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.quantity.Pieces;
+import de.hdc.commonlibrary.module.DAWaresContainer;
 
 /**
  *
@@ -27,7 +31,7 @@ import de.hdc.commonlibrary.data.quantity.Pieces;
  */
 public interface IDAWare extends IDataAtom {
 
-//    public void resolveOther(DVCsmModuleContainer aParentContainer);
+    public void init(DAWareClassMap map);
     public DAUniqueID getClassID();
     public DAUniqueID getItemID();
     public DAText getName();
@@ -36,8 +40,9 @@ public interface IDAWare extends IDataAtom {
     public Unit<?> getUnit();
     public DAValue<Volume> getVolume();
     public DAValue<Pieces> getAmount();
+    public boolean add(DAValue<Pieces> value);
+    public boolean sub(DAValue<Pieces> value);
     public boolean isUnique();
     public IDAWare makeUnique(DAText name);
     public DAWare.SubType getSubType();
-
 }

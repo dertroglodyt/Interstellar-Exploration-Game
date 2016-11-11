@@ -11,6 +11,10 @@
 
 package de.hdc.commonlibrary.market;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 import de.hdc.commonlibrary.data.atom.DataAtom;
 
 /**
@@ -18,8 +22,7 @@ import de.hdc.commonlibrary.data.atom.DataAtom;
  *
  * @author martin
  */
-@SuppressWarnings("serial")
-public abstract class DAMarket extends DataAtom { //implements IActionHandler {
+public class DAMarket extends DataAtom {
 
 //    private static final long serialVersionUID = SerialUIDPool.UID.DAMarket.value();
 //
@@ -751,5 +754,24 @@ public abstract class DAMarket extends DataAtom { //implements IActionHandler {
 //    public DAResult<de.dertroglodyt.iegcommon.module.DAbmWaresContainer> split(DAbmStorage sto, de.dertroglodyt.iegcommon.module.DAbmWaresContainer wc, DAValue<Pieces> a) {
 //        return sto.split(wc, a);
 //    }
+
+    @Override
+    public void toStream(DataOutputStream stream) throws IOException {
+        stream.writeByte(VERSION);
+    }
+
+    /**
+     * Init() needs to be called after deserialization.
+     */
+    @Override
+    public DAWare fromStream(DataInputStream stream) throws IOException {
+        final byte v = stream.readByte();
+        if (v < 1) {
+            throw new IllegalArgumentException("Invalid version number " + v);
+        }
+        return null;
+    }
+
+    private static final byte VERSION = 1;
 
 }
