@@ -13,6 +13,7 @@ import javax.measure.quantity.Energy;
 import javax.measure.unit.SI;
 
 import de.hdc.commonlibrary.data.atom.DAValue;
+import de.hdc.commonlibrary.data.quantity.Pieces;
 import de.hdc.commonlibrary.market.DAWare;
 import de.hdc.commonlibrary.market.DAWareClass;
 import de.hdc.commonlibrary.market.DAWareClassMap;
@@ -547,6 +548,21 @@ public class DAModuleContainer extends DABasicModule {
 ////        s.resolve(worldNode);
 //        return s;
 //    }
+
+    @Override
+    public void init(DAWareClassMap map) {
+
+    }
+
+    @Override
+    public boolean add(DAValue<Pieces> value) {
+        return false;
+    }
+
+    @Override
+    public boolean sub(DAValue<Pieces> value) {
+        return false;
+    }
 
     @Override
     public DAWare.SubType getSubType() {

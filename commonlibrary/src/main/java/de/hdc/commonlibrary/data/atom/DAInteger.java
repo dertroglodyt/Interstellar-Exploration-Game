@@ -70,12 +70,18 @@ public class DAInteger<Q extends Quantity> extends DataAtom {
         return new DAInteger<>(dm);
     }
 
+    @Deprecated
+    public DAInteger() {
+        super();
+        value = null;
+    }
+
     @Override
     //@SuppressWarnings("unchecked")
     public int doCompare(@NonNull IDataAtom o) {
-        if (!(o instanceof DAInteger)) {
-            return -1;
-        }
+//        if (!(o instanceof DAInteger)) {
+//            return -1;
+//        }
         if (!((DAInteger<?>) o).getUnit()
                 .isCompatible(value.getUnit())) {
             return -1;
@@ -164,7 +170,7 @@ public class DAInteger<Q extends Quantity> extends DataAtom {
 
     public DAInteger<? extends Quantity> divInt(DAInteger<?> other) {
         final BigDecimal bd = value.getValue().divide(other.value.getValue(), MC);
-        return create(bd.toBigInteger(), getUnit().times(other.getUnit()));
+        return create(bd.toBigInteger(), getUnit().divide(other.getUnit()));
     }
 
     public boolean isZero() {
@@ -172,7 +178,8 @@ public class DAInteger<Q extends Quantity> extends DataAtom {
     }
 
     public DAInteger<Q> tail(Unit<Q> u) {
-        return create(value.to(u).getValue().remainder(BigDecimal.ONE), u);
+//        return create(value.to(u).getValue().remainder(BigDecimal.ONE), u);
+        return new DAInteger<Q>(BigInteger.ZERO, u);
     }
 
     public DAInteger<Q> head(Unit<Q> u) {
@@ -199,11 +206,6 @@ public class DAInteger<Q extends Quantity> extends DataAtom {
     private static final MathContext MC = new MathContext(30, RoundingMode.HALF_EVEN);
 
     private final DecimalMeasure<Q> value;
-
-    private DAInteger() {
-        super();
-        throw new IllegalAccessError();
-    }
 
     private DAInteger(DecimalMeasure<Q> value) {
         super();

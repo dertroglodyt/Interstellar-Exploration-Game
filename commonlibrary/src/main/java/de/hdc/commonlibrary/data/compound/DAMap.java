@@ -84,9 +84,9 @@ public abstract class DAMap<Q extends IDataAtom, T extends IDataAtom> extends Da
 
     @Override
     public int doCompare(IDataAtom o) {
-        if (!(o instanceof DAMap)) {
-            return -1;
-        }
+//        if (!(o instanceof DAMap)) {
+//            return -1;
+//        }
         for (Map.Entry<Q, T> qtEntry : table.entrySet()) {
             if (((DAMap) o).get(qtEntry.getKey()) == null) {
                 return -1;
@@ -109,11 +109,11 @@ public abstract class DAMap<Q extends IDataAtom, T extends IDataAtom> extends Da
     }
 
 //    public static DATextList<Q, T> fromStream(DataInputStream stream) throws IOException {
-//        final DATextList<?, ?> t = new DATextList();
 //        final byte v = stream.readByte(); // version
 //        if (v < 1) {
 //            throw new IllegalArgumentException("Invalid version number " + v);
 //        }
+//        final DAMap<?, ?> t = new DAMap();
 //        final int x = stream.readInt();
 //        for (int i = 0; i < x; i++) {
 //            final Q key = Q.fromStream(stream);
@@ -123,7 +123,7 @@ public abstract class DAMap<Q extends IDataAtom, T extends IDataAtom> extends Da
 //        return t;
 //    }
 
-    private final ConcurrentSkipListMap<Q, T> table;
+    protected final ConcurrentSkipListMap<Q, T> table;
 
     private static final byte VERSION = 1;
 

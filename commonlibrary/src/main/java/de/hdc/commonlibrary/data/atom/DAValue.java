@@ -69,15 +69,15 @@ public class DAValue<Q extends Quantity> extends DataAtom {
 
     @Override
     //@SuppressWarnings("unchecked")
-    public int doCompare(@NonNull IDataAtom o) {
-        if (!(o instanceof DAValue)) {
-            return -1;
-        }
+    public int doCompare(IDataAtom o) {
+//        if (!(o instanceof DAValue)) {
+//            return -1;
+//        }
         if (!((DAValue<?>) o).getUnit()
                 .isCompatible(value.getUnit())) {
             return -1;
         }
-        return toBaseUnit().compareTo(((DAValue<?>) o).toBaseUnit());
+        return toBaseUnit().value.getValue().compareTo(((DAValue<?>) o).toBaseUnit().value.getValue());
     }
 
     @Override

@@ -23,8 +23,7 @@ public class DAText extends DataAtom {
 
     @Override
     public String toString() {
-        return "DALine{" +
-                "value='" + value + "'}";
+        return value;
     }
 
     @Override

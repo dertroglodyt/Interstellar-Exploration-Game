@@ -1,3 +1,9 @@
+/*
+ *  Created by DerTroglodyt on 2016-11-15 18:46
+ *  Email dertroglodyt@gmail.com
+ *  Copyright by HDC, Germany
+ */
+
 package de.hdc.commonlibrary.data.atom;
 
 import org.junit.Test;
@@ -21,8 +27,12 @@ public class DAVectorTest {
     @Test
     public void normalize() {
         System.out.println("DAValue.normalize:");
-        DAVector v = DAVector.create(SI.METER, 3, 3, 3).normalize();
-        DAVector r = DAVector.create(SI.METER, 1, 1, 1);
+        DAVector v = DAVector.create(SI.METER, 3.0, 3.0, 3.0).normalize();
+        DAVector r = DAVector.create(SI.METER, 1.0, 1.0, 1.0);
+        assertTrue(r.toString() + "->" + v.toString(), r.equals(v));
+
+        v = DAVector.create(SI.METER, 2, 2, 2).normalize();
+        r = DAVector.create(SI.METER, 1/3, 1/3, 1/3);
         assertTrue(r.toString() + "->" + v.toString(), r.equals(v));
     }
 }

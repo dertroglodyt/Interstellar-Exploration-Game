@@ -61,9 +61,9 @@ public class DADateTime extends DataAtom {
 
     @Override
     public int doCompare(IDataAtom o) {
-        if (!(o instanceof DADateTime)) {
-            return -1;
-        }
+//        if (!(o instanceof DADateTime)) {
+//            return -1;
+//        }
         if (date != null) {
             return this.date.compareTo(((DADateTime)o).date);
         } else {

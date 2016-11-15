@@ -5,7 +5,9 @@
 package de.hdc.commonlibrary.data.compound;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Map;
 
 import de.hdc.commonlibrary.data.atom.DAText;
 
@@ -17,6 +19,16 @@ public class DATextMap extends DAMap<DAText, DAText> {
 
     public static DATextMap create() {
         return new DATextMap();
+    }
+
+    @Override
+    public void toStream(DataOutputStream stream) throws IOException {
+        stream.writeByte(VERSION);
+        stream.writeInt(table.size());
+        for (Map.Entry<DAText, DAText> entry : table.entrySet()) {
+            entry.getKey().toStream(stream);
+            entry.getValue().toStream(stream);
+        }
     }
 
     @Override

@@ -64,6 +64,10 @@ public final class DAUniqueID extends DataAtom {
         return idStr;
     }
 
+    /**
+     * A UniqueID of all zeros is invalid!
+     * @return
+     */
     public boolean isValid() {
         for (int i=0; i < byteList.length; i++) {
             if (byteList[i] != 0) {

@@ -66,9 +66,9 @@ public abstract class DASet<Q extends IDataAtom> extends DataAtom {
 
     @Override
     public int doCompare(IDataAtom o) {
-        if (!(o instanceof DASet)) {
-            return -1;
-        }
+//        if (!(o instanceof DASet)) {
+//            return -1;
+//        }
         if (set.size() != ((DASet) o).size()) {
             return -1;
         }

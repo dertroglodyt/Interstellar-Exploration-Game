@@ -61,17 +61,17 @@ public class DAVector<Q extends Quantity> extends DataAtom {
 
     @Override
     public int doCompare(IDataAtom o) {
-        if (!(o instanceof DAVector)) {
+//        if (!(o instanceof DAVector)) {
+//            return -1;
+//        }
+        if (vector.size() != ((DAVector<?>) o).getSize()) {
             return -1;
         }
         if (!((DAVector<?>) o).getUnit().isCompatible(getUnit())) {
             return -1;
         }
-        if (vector.size() != ((DAVector<?>) o).getSize()) {
-            return -1;
-        }
         for (int i = 0; i < vector.size(); i++) {
-            if (! vector.get(i).equals(((DAVector<?>) o).vector.get(i))) {
+            if (0 == vector.get(i).doCompare((((DAVector<?>) o).vector.get(i)))) {
                 return -1;
             }
         }
