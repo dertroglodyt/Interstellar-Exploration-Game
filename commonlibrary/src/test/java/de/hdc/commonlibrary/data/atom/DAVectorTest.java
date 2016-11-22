@@ -28,7 +28,11 @@ public class DAVectorTest {
     public void normalize() {
         System.out.println("DAValue.normalize:");
         DAVector v = DAVector.create(SI.METER, 3.0, 3.0, 3.0).normalize();
-        DAVector r = DAVector.create(SI.METER, 1.0, 1.0, 1.0);
+        DAVector r = DAVector.create(SI.METER, 3.0/27.0, 3.0/27.0, 3.0/27.0);
+        assertTrue(r.toString() + "->" + v.toString(), r.equals(v));
+
+        v = DAVector.create(SI.METER, 2, 2, 2).normalize();
+        r = DAVector.create(SI.METER, 1/3, 1/3, 1/3);
         assertTrue(r.toString() + "->" + v.toString(), r.equals(v));
 
         v = DAVector.create(SI.METER, 2, 2, 2).normalize();

@@ -100,7 +100,7 @@ public class DAIntegerTest {
         DAInteger<Length> i = DAInteger.create(BigDecimal.valueOf(12000.3), SI.METER);
         assertTrue(i.doubleValueBase()+"", "1200000 cm".equals(i.to(SI.CENTIMETER).toString()));
 
-        i = DAInteger.create(BigDecimal.valueOf(12.3), SI.METER);
+        i = DAInteger.create(BigDecimal.valueOf(12000), SI.METER);
         assertTrue(i.to(SI.KILO(SI.METER)).toString(), "12 km".equals(i.to(SI.KILO(SI.METER)).toString()));
     }
 

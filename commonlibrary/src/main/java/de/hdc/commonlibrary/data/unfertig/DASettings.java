@@ -10,6 +10,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.NonSI;
@@ -18,7 +19,7 @@ import de.hdc.commonlibrary.data.IDataAtom;
 import de.hdc.commonlibrary.data.atom.DAText;
 import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.atom.DAVector;
-import de.hdc.commonlibrary.data.compound.DATextMap;
+import de.hdc.commonlibrary.data.compound.DAMap;
 
 /**
  * An enumeration of properties (key-value pairs).
@@ -27,7 +28,7 @@ import de.hdc.commonlibrary.data.compound.DATextMap;
  *
  * @author dertroglodyt
  */
-public class DASettings extends DATextMap {
+public class DASettings extends DAMap<DAText, DAText> {
 
     public enum System {
         APPLICATION_PATH, COFIG_PATH;
@@ -51,14 +52,14 @@ public class DASettings extends DATextMap {
      * Create default settings.
      */
     public DASettings create(String applicationPath) {
-        DATextMap s = super.create();
+        DASettings s = new DASettings();
         s.set(System.APPLICATION_PATH.key, DAText.create(applicationPath));
         s.set(System.COFIG_PATH.key, DAText.create(applicationPath + File.separator + "config"));
         DAVector<? extends Quantity> v = DAVector.create(NonSI.PIXEL, 1024.0, 800.0);
         s.set(Grafics.SCREEN_SIZE.key, DAText.create(v.toString()));
         DAValue<? extends Quantity> vv = DAValue.create(12, NonSI.PIXEL);
         s.set(Grafics.FONT_SIZE.key, DAText.create(vv.toString()));
-        return new DASettings(s);
+        return s;
     }
 
 //    public DASettings(DATextMap grafics) {
@@ -97,27 +98,35 @@ public class DASettings extends DATextMap {
 
     @Override
     public void toStream(@NonNull DataOutputStream stream) throws IOException {
-        super.toStream(stream);
         stream.writeByte(VERSION);
+        stream.writeInt(table.size());
+        for (Map.Entry<DAText, DAText> entry : table.entrySet()) {
+            entry.getKey().toStream(stream);
+            entry.getValue().toStream(stream);
+        }
     }
 
     @Override
     public DASettings fromStream(DataInputStream stream) throws IOException {
-        DATextMap map = super.fromStream(stream);
-        final byte v = stream.readByte();
+        final byte v = stream.readByte(); // version
         if (v < 1) {
             throw new IllegalArgumentException("Invalid version number " + v);
         }
-        return new DASettings(map);
+        final DASettings t = new DASettings();
+        final int x = stream.readInt();
+        for (int i = 0; i < x; i++) {
+            final DAText key = new DAText().fromStream(stream);
+            final DAText a = new DAText().fromStream(stream);
+            t.set(key, a);
+        }
+        return t;
     }
 
     private static final byte VERSION = 1;
 
-    private DASettings(DATextMap map) {
+    @Deprecated
+    public DASettings() {
         super();
-        for (DAText key : map.getKeySet()) {
-            set(key, map.get(key));
-        }
     }
 
 }

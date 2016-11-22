@@ -21,6 +21,7 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 
 import javax.measure.DecimalMeasure;
+import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
@@ -156,6 +157,21 @@ public class DAValue<Q extends Quantity> extends DataAtom {
     public DAValue<? extends Quantity> div(DAValue<?> other) {
         BigDecimal bd = value.getValue().divide(other.value.getValue(), MC);
         return new DAValue<>(bd, getUnit().divide(other.getUnit()));
+    }
+
+    public DAValue<? extends Quantity> sqr() {
+        BigDecimal bd = value.getValue().pow(2, MC);
+        return new DAValue<>(bd, getUnit().times(getUnit()));
+    }
+
+    // todo not exactly correct unit
+    public DAValue<? extends Quantity> sqrt() {
+        BigDecimal bd = value.getValue().pow(-2, MC);
+        return new DAValue<>(bd, Dimensionless.UNIT);
+    }
+
+    public BigDecimal getBigDecimal() {
+        return value.getValue();
     }
 
     public boolean isZero() {

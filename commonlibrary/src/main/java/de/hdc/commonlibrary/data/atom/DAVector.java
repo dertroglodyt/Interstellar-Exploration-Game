@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
@@ -47,14 +48,15 @@ public class DAVector<Q extends Quantity> extends DataAtom {
     @SuppressWarnings("unchecked")
     public DAVector<Q> normalize() {
         Unit u = vector.get(0).getUnit().getStandardUnit();
-        DAValue<Q> r = DAValue.<Q>create(0L, u);
+        BigDecimal sum = BigDecimal.ZERO;
         for (DAValue<Q> v : vector) {
-            r = r.add(v.to(u));
+            DAValue<Q> x = v.to(u);
+            sum = sum.add(x.sqr().getBigDecimal());
         }
-        r = (DAValue<Q>)r.div(DAValue.<Q>create(vector.size(), u));
+        DAValue si = DAValue.create(sum, Dimensionless.UNIT).sqrt();
         final List<DAValue<Q>> vr = new ArrayList<>(x);
         for (DAValue<Q> v : vector) {
-            vr.add((DAValue<Q>) v.div(r));
+            vr.add((DAValue<Q>) v.div(si));
         }
         return new DAVector<Q>(vr);
     }

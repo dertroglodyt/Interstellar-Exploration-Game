@@ -26,6 +26,7 @@ import de.hdc.commonlibrary.data.atom.DAText;
 import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.atom.DataAtom;
+import de.hdc.commonlibrary.data.quantity.Pieces;
 
 /**
  * Holds the invariable properties of a DAWare.
@@ -35,6 +36,7 @@ public class DAWareClass extends DataAtom {
 
     public static final DAWareClass ELECTRICAL_POWER = new DAWareClass(
             DAUniqueID.parse("00000000000000000000000000000001")
+            , DAUniqueID.parse("00000000000000000000000000000001")
             , DAText.create("Electrical Power"), DAText.create("Needs description"), Size.NONE
             , State.PUBLIC, SI.JOULE, DAValue.<Mass>create(0, SI.KILOGRAM), DAValue.<Volume>create(0, SI.CUBIC_METRE)
             , DAText.create("Electrical Power"));
@@ -112,6 +114,7 @@ public class DAWareClass extends DataAtom {
     }
 
     public final DAUniqueID id;
+    public final DAUniqueID typeID;
     public final DAText name;
     public final DAText description;
     public final Size size;
@@ -122,15 +125,28 @@ public class DAWareClass extends DataAtom {
     public final DAText assetName;
     public final transient DAValue<VolumetricDensity> kgPerM3;
 
-    public DAWareClass create(DAUniqueID id, DAText name, DAText description, Size size, State state
+    public static DAWareClass create(DAUniqueID id, DAUniqueID typeID, DAText name, DAText description, Size size, State state
             , Unit<?> unit, DAValue<Mass> mass, DAValue<Volume> volume, DAText assetName) {
-            return new DAWareClass(id, name, description, size, state, unit, mass, volume, assetName);
+            return new DAWareClass(id, typeID, name, description, size, state, unit, mass, volume, assetName);
+    }
+
+    /**
+     * Used by DAWareTypeTreeBootstrap.
+     * @param id
+     * @param name
+     * @return
+     */
+    @Deprecated
+    public static DAWareClass create(DAUniqueID id, DAUniqueID typeID, DAText name) {
+        return new DAWareClass(id, typeID, name, DAText.create(""), Size.NONE, State.ADMIN, Pieces.UNIT
+                , DAValue.<Mass>create("1 kg"), DAValue.<Volume>create(" 1m³"), DAText.create(""));
     }
 
     @Deprecated
     public DAWareClass() {
         super();
         this.id = null;
+        this.typeID = null;
         this.name = null;
         this.description = null;
         this.size = null;
@@ -157,6 +173,7 @@ public class DAWareClass extends DataAtom {
         stream.writeByte(VERSION);
 
         id.toStream(stream);
+        typeID.toStream(stream);
         name.toStream(stream);
         description.toStream(stream);
         stream.writeUTF(size.toSerialString());
@@ -174,6 +191,7 @@ public class DAWareClass extends DataAtom {
             throw new IllegalArgumentException("Invalid version number " + v);
         }
         final DAUniqueID id = new DAUniqueID().fromStream(stream);
+        final DAUniqueID typeID = new DAUniqueID().fromStream(stream);
         final DAText name = new DAText().fromStream(stream);
         final DAText description = new DAText().fromStream(stream);
         final Size size = Size.valueFrom(stream.readUTF());
@@ -183,15 +201,16 @@ public class DAWareClass extends DataAtom {
         final DAValue<Volume> volume = new DAValue().fromStream(stream);
         final DAText assetName = new DAText().fromStream(stream);
 
-        return new DAWareClass(id, name, description, size, state, unit, mass, volume, assetName);
+        return new DAWareClass(id, typeID, name, description, size, state, unit, mass, volume, assetName);
     }
 
     private static final byte VERSION = 1;
 
-    private DAWareClass(DAUniqueID id, DAText name, DAText description, Size size, State state
+    private DAWareClass(DAUniqueID id, DAUniqueID typeID, DAText name, DAText description, Size size, State state
             , Unit<?> unit, DAValue<Mass> mass, DAValue<Volume> volume, DAText assetName) {
         super();
         this.id = id;
+        this.typeID = typeID;
         this.name = name;
         this.description = description;
         this.size = size;

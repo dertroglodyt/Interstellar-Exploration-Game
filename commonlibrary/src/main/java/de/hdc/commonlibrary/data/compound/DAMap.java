@@ -12,8 +12,6 @@
 
 package de.hdc.commonlibrary.data.compound;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -96,17 +94,17 @@ public abstract class DAMap<Q extends IDataAtom, T extends IDataAtom> extends Da
             }
         }
         return 0;
-    }
+}
 
-    @Override
-    public void toStream(DataOutputStream stream) throws IOException {
-        stream.writeByte(VERSION);
-        stream.writeInt(table.size());
-        for (Map.Entry<Q, T> entry : table.entrySet()) {
-            entry.getKey().toStream(stream);
-            entry.getValue().toStream(stream);
-        }
-    }
+//    @Override
+//    public void toStream(DataOutputStream stream) throws IOException {
+//        stream.writeByte(VERSION);
+//        stream.writeInt(table.size());
+//        for (Map.Entry<Q, T> entry : table.entrySet()) {
+//            entry.getKey().toStream(stream);
+//            entry.getValue().toStream(stream);
+//        }
+//    }
 
 //    public static DATextList<Q, T> fromStream(DataInputStream stream) throws IOException {
 //        final byte v = stream.readByte(); // version
