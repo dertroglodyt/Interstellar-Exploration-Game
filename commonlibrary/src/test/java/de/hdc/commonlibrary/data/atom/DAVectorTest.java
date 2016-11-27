@@ -8,6 +8,12 @@ package de.hdc.commonlibrary.data.atom;
 
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+
+import javax.measure.quantity.Length;
 import javax.measure.unit.SI;
 
 import static junit.framework.Assert.assertEquals;
@@ -19,6 +25,19 @@ import static junit.framework.Assert.assertTrue;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 public class DAVectorTest {
+    @Test
+    public void toStream() throws Exception {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
+        DAVector<Length> expected = DAVector.create(DAValue.create("1 m"), DAValue.create("1 m")
+                , DAValue.create("1 m"));
+        expected.toStream(new DataOutputStream(bos));
+        bos.close();
+
+        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(bos.toByteArray()));
+        DAVector b = new DAVector().fromStream(dis);
+        assertTrue(expected.toString() + "###" + b.toString(), expected.equals(b));
+    }
+
     @Test
     public void addition_isCorrect() throws Exception {
         assertEquals(4, 2 + 2);

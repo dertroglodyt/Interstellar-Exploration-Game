@@ -121,6 +121,9 @@ public class DAWareClass extends DataAtom {
     public final State state;
     public final Unit<?> unit;
     public final DAValue<Mass> mass;
+    /**
+     * The volume which this component encloses.
+     */
     public final DAValue<Volume> volume;
     public final DAText assetName;
     public final transient DAValue<VolumetricDensity> kgPerM3;
@@ -132,14 +135,11 @@ public class DAWareClass extends DataAtom {
 
     /**
      * Used by DAWareTypeTreeBootstrap.
-     * @param id
-     * @param name
-     * @return
      */
     @Deprecated
     public static DAWareClass create(DAUniqueID id, DAUniqueID typeID, DAText name) {
         return new DAWareClass(id, typeID, name, DAText.create(""), Size.NONE, State.ADMIN, Pieces.UNIT
-                , DAValue.<Mass>create("1 kg"), DAValue.<Volume>create(" 1m³"), DAText.create(""));
+                , DAValue.<Mass>create(1, SI.KILOGRAM), DAValue.<Volume>create(1, SI.CUBIC_METRE), DAText.create(""));
     }
 
     @Deprecated
@@ -190,18 +190,18 @@ public class DAWareClass extends DataAtom {
         if (v < 1) {
             throw new IllegalArgumentException("Invalid version number " + v);
         }
-        final DAUniqueID id = new DAUniqueID().fromStream(stream);
-        final DAUniqueID typeID = new DAUniqueID().fromStream(stream);
-        final DAText name = new DAText().fromStream(stream);
-        final DAText description = new DAText().fromStream(stream);
-        final Size size = Size.valueFrom(stream.readUTF());
-        final State state = State.valueOf(stream.readUTF());
-        final Unit<?> unit = Unit.valueOf(stream.readUTF());
-        final DAValue<Mass> mass = new DAValue().fromStream(stream);
-        final DAValue<Volume> volume = new DAValue().fromStream(stream);
-        final DAText assetName = new DAText().fromStream(stream);
+        final DAUniqueID aid = new DAUniqueID().fromStream(stream);
+        final DAUniqueID atypeID = new DAUniqueID().fromStream(stream);
+        final DAText aname = new DAText().fromStream(stream);
+        final DAText adescription = new DAText().fromStream(stream);
+        final Size asize = Size.valueFrom(stream.readUTF());
+        final State astate = State.valueOf(stream.readUTF());
+        final Unit<?> aunit = Unit.valueOf(stream.readUTF());
+        final DAValue<Mass> amass = new DAValue<Mass>().fromStream(stream);
+        final DAValue<Volume> avolume = new DAValue<Volume>().fromStream(stream);
+        final DAText aassetName = new DAText().fromStream(stream);
 
-        return new DAWareClass(id, typeID, name, description, size, state, unit, mass, volume, assetName);
+        return new DAWareClass(aid, atypeID, aname, adescription, asize, astate, aunit, amass, avolume, aassetName);
     }
 
     private static final byte VERSION = 1;
@@ -219,7 +219,7 @@ public class DAWareClass extends DataAtom {
         this.mass = mass;
         this.volume = volume;
         this.assetName = assetName;
-        if (volume.isZero()) {
+        if (! volume.isZero()) {
             final DAValue<VolumetricDensity> d = (DAValue<VolumetricDensity>) mass.div(volume);
             kgPerM3 = d.to(VolumetricDensity.UNIT);
         } else {

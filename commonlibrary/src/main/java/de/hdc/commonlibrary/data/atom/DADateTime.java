@@ -33,10 +33,18 @@ public class DADateTime extends DataAtom {
 
     public static final long DAY_SECONDS = 86400L;
 
-    public static DADateTime now() {
+    public static final DADateTime now() {
         // Milli seconds since 1.1.1970 00:00:00
         final DAValue<Duration> jd = DAValue.create(System.currentTimeMillis(), SI.MILLI(SI.SECOND));
         return new DADateTime(jd.add(JD_1970_1_1));
+    }
+
+    public static final DADateTime create(DAValue<Duration> julianDate) {
+        return new DADateTime(julianDate);
+    }
+
+    public static final DADateTime create(DADateTime date) {
+        return new DADateTime(date.asJulianDate());
     }
 
     @Deprecated
@@ -45,15 +53,15 @@ public class DADateTime extends DataAtom {
         date = null;
     }
 
-    public DADateTime(DAValue<Duration> julianDate) {
+    private DADateTime(DAValue<Duration> julianDate) {
         super();
         this.date = julianDate;
     }
 
     @Override
     public String toString() {
-        if (date != null) {
-            return date.to(NonSI.DAY).toString() + " [d]";
+        if (date != NEVER.asJulianDate()) {
+            return asJulianDate().toString();
         } else {
             return NEVER_STR;
         }
@@ -64,15 +72,7 @@ public class DADateTime extends DataAtom {
 //        if (!(o instanceof DADateTime)) {
 //            return -1;
 //        }
-        if (date != null) {
-            return this.date.compareTo(((DADateTime)o).date);
-        } else {
-            if (((DADateTime)o).date == null) {
-                return 0;
-            } else {
-                return -1;
-            }
-        }
+        return this.date.compareTo(((DADateTime)o).date);
     }
 
     //todo result is plain wrong
@@ -111,6 +111,10 @@ public class DADateTime extends DataAtom {
         return r;
     }
 
+    public DAValue<Duration> asJulianDate() {
+        return date;
+    }
+
     /**
      * Adds the given period to the current date/time.
      * Returns the new DADateTime.
@@ -138,7 +142,7 @@ public class DADateTime extends DataAtom {
     }
 
     public boolean isNever() {
-        return (date == null);
+        return (date.compareTo(NEVER) == 0);
     }
 
     public static DADateTime getNEVER() {
@@ -178,7 +182,8 @@ public class DADateTime extends DataAtom {
     @Override
     public void toStream(@NonNull DataOutputStream stream) throws IOException {
         stream.writeByte(VERSION);
-        stream.writeUTF(toString());
+
+        date.toStream(stream);
     }
 
     @Override
@@ -187,12 +192,13 @@ public class DADateTime extends DataAtom {
         if (v < 1) {
             throw new IllegalArgumentException("Invalid version number " + v);
         }
-        return new DADateTime(stream.readUTF());
+        final DAValue<Duration> adate = new DAValue<Duration>().fromStream(stream);
+        return create(adate);
     }
 
     private static final byte VERSION = 1;
     private static final String NEVER_STR = "<NEVER>";
-    private static final DADateTime NEVER = new DADateTime(NEVER_STR);
+    private static final DADateTime NEVER = DADateTime.create(DAValue.<Duration>create("-1"));
     private static final DAValue<Duration> JD_1970_1_1 = DAValue.create("2440587.5 [day]");
 
     private final DAValue<Duration> date;
@@ -200,7 +206,7 @@ public class DADateTime extends DataAtom {
     private DADateTime(String julianDayNumber) {
         super();
         if (julianDayNumber.equals(NEVER_STR)) {
-            this.date = null;
+            this.date = NEVER.asJulianDate();
             return;
         }
         this.date = DAValue.create(julianDayNumber);

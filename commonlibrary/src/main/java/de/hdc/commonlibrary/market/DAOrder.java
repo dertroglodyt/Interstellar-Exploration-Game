@@ -27,6 +27,7 @@ import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.atom.DataAtom;
 import de.hdc.commonlibrary.data.quantity.Pieces;
+import de.hdc.commonlibrary.util.Log;
 
 /**
  *
@@ -69,6 +70,14 @@ public class DAOrder extends DataAtom {
     public final DAUniqueID storageID;
     /** Free text for this order */
     public final DAText description;
+
+    public static final DAOrder create(Type aType, IDAWare aWare, DAValue<Money> aPrice
+            , DADateTime aExpires, DAUniqueID aStorageID
+            , DAUniqueID aClanID, DAText aDescription, DAValue<Pieces> refillMaxAmount
+            , DAValue<Duration> aRefillTime, DADateTime aNextFillUp) {
+        return new DAOrder(DAUniqueID.createRandom(), aType, aWare, aPrice, aExpires, aStorageID, aClanID
+                , aDescription, refillMaxAmount, aRefillTime, aNextFillUp);
+    }
 
 //    public static DAOrder createBuyOrder(DAValue<Pieces> aAmount, DAValue<Money> aPrice, DAWareClass aWareClass
 //            , DAbmStorage aStorage, DAText aDescription) {
@@ -122,6 +131,27 @@ public class DAOrder extends DataAtom {
 //                , aDescription, aMaxAmount, aRefillTime);
 //    }
 
+    @Deprecated
+    public DAOrder() {
+        super();
+        maxAmount = null;
+        refillTime = null;
+        nextFillup = null;
+        orderID = null;
+        type = null;
+        created = null;
+        expires = null;
+        price = null;
+        ware = null;
+        clanID = null;
+        storageID = null;
+        description = null;
+    }
+
+    public void init(DAWareTypeTree tree) {
+        ware.init(tree);
+    }
+
     public static DADateTime getExpirationDate(DADateTime start) {
         return start.addDuration(DAValue.<Duration>create(30, NonSI.DAY));
     }
@@ -147,11 +177,15 @@ public class DAOrder extends DataAtom {
     }
 
     public boolean containsWare(IDAWare w) {
-        if (ware == null) {
-            return (w.getClassID().equals(ware.getClassID()));
+        if (ware.getItemID() != null) {
+            return (w.getItemID().equals(ware.getItemID()));
         } else {
-            return ware.getWareClass().equals(w.getWareClass());
+            return ware.equals(w);
         }
+    }
+
+    public boolean containsType(DAWareClass type) {
+        return ware.getWareClass().equals(type);
     }
 
     public DAValue<Pieces> getAmount() {
@@ -182,33 +216,32 @@ public class DAOrder extends DataAtom {
 //        }
 //    }
 
-    //todo
-//    public void remove(DAValue<Pieces> a) {
-//        try {
-//            if (isBuyOrder()) {
-//                buyAmount = buyAmount.sub(a);
-//            } else {
-//                ware.sub(a);
-//            }
-//        } catch (Exception e) {
-//            Log.warn(DAOrder.class, "remove: DAOrder: <" + this.toParseString("") + "> " + e.toString());
-//        }
-//    }
+    public void remove(DAValue<Pieces> a) {
+        try {
+            if (isBuyOrder()) {
+                ware.add(a);
+            } else {
+                ware.sub(a);
+            }
+        } catch (Exception e) {
+            Log.warn(DAOrder.class, "remove: DAOrder: <" + this.toString() + "> " + e);
+        }
+    }
 
     @Override
     public String toString() {
         if (isBuyOrder()) {
-            return getAmount().toString() + " " + ware.getClass().toString() + " " + price.toString();
+            return orderID + ": " + getAmount() + " " + ware + " " + price;
         } else {
-            return getWaresString() + " " + price.toString();
+            return orderID + ": " + getWaresString() + " " + price;
         }
     }
 
     @Override
     public int doCompare(IDataAtom o) {
-        if (!(o instanceof DAOrder)) {
-            return -1;
-        }
+//        if (!(o instanceof DAOrder)) {
+//            return -1;
+//        }
         return orderID.compareTo(((DAOrder) o).orderID);
     }
 
@@ -227,7 +260,7 @@ public class DAOrder extends DataAtom {
 //            wareClassID.toStream(stream);
 //            wareClassString.toStream(stream);
 //        }
-        stream.writeUTF(ware.getSubType().toString());
+        stream.writeUTF(ware.getClass().getName());
         ware.toStream(stream);
         storageID.toStream(stream);
         clanID.toStream(stream);
@@ -261,28 +294,25 @@ public class DAOrder extends DataAtom {
         try {
             final Class<?> c = Class.forName(stream.readUTF());
             aware = (IDAWare) ((IDAWare) c.newInstance()).fromStream(stream);
-        } catch (InstantiationException e) {
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
             e.printStackTrace();
-            //throw new InstantiationException(e.toString());
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e1) {
-            e1.printStackTrace();
+            throw new IOException(e.toString());
         }
-        DAUniqueID aclanID = new DAUniqueID().fromStream(stream);
         DAUniqueID astorageID = new DAUniqueID().fromStream(stream);
+        DAUniqueID aclanID = new DAUniqueID().fromStream(stream);
         DAText adescription = new DAText().fromStream(stream);
         DAValue<Pieces> amaxAmount = new DAValue().fromStream(stream);
         DAValue<Duration> arefillTime = new DAValue().fromStream(stream);
         DADateTime anextFillUp = new DADateTime().fromStream(stream);
 
-        return new DAOrder(atype, aware, aprice, aexpires, astorageID, aclanID, adescription
+        return new DAOrder(aorderID, atype, aware, aprice, aexpires, astorageID, aclanID, adescription
                 , amaxAmount, arefillTime, anextFillUp);
     }
 
     private static final byte VERSION = 1;
 
-    private DAOrder(Type aType, IDAWare aWare, DAValue<Money> aPrice, DADateTime aExpires, DAUniqueID aStorageID
+    private DAOrder(DAUniqueID aOrderID, Type aType, IDAWare aWare, DAValue<Money> aPrice
+            , DADateTime aExpires, DAUniqueID aStorageID
             , DAUniqueID aClanID, DAText aDescription, DAValue<Pieces> refillMaxAmount
             , DAValue<Duration> aRefillTime, DADateTime aNextFillUp) {
         super();
@@ -336,10 +366,10 @@ public class DAOrder extends DataAtom {
 //                return;
 //            }
 //        }
-        orderID = DAUniqueID.createRandom();
+        orderID = aOrderID;
         type = aType;
         ware = aWare;
-        created = new DADateTime();
+        created = DADateTime.now();
         expires = aExpires;
         price = aPrice;
         storageID = aStorageID;

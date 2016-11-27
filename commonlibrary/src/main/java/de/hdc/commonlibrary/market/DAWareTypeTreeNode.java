@@ -79,7 +79,7 @@ public class DAWareTypeTreeNode extends DataAtom {
      */
     public DAWareTypeTreeNode findChildByName(DAText name) {
         for (DAWareTypeTreeNode tn : children) {
-            if (tn.getID().compareTo(name) == 0) {
+            if (tn.getDisplayName().compareTo(name) == 0) {
                 return tn;
             }
         }

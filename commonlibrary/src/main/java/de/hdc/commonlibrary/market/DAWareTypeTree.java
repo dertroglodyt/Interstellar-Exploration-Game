@@ -12,15 +12,18 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import de.hdc.commonlibrary.data.atom.DAText;
 import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DataAtom;
 
 public class DAWareTypeTree extends DataAtom {
 
+    @Deprecated
     public static DAWareTypeTree create() {
-        return new DAWareTypeTree(DAWareTypeTreeNode.create(null, DAText.create("WareTypeTree")
-                , DAText.create("You should never read this...")));
+        return new DAWareTypeTree(DAWareTypeTreeBootstrap.create());
+    }
+
+    public static DAWareTypeTree create(DAWareTypeTreeNode root) {
+        return new DAWareTypeTree(root);
     }
 
     @Override

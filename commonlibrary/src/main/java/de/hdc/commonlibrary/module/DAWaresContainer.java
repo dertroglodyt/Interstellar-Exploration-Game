@@ -19,9 +19,8 @@ import java.util.List;
 
 import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.quantity.Pieces;
-import de.hdc.commonlibrary.market.DAWare;
 import de.hdc.commonlibrary.market.DAWareClass;
-import de.hdc.commonlibrary.market.DAWareClassMap;
+import de.hdc.commonlibrary.market.DAWareTypeTree;
 import de.hdc.commonlibrary.market.IDAWare;
 
 /**
@@ -38,8 +37,8 @@ public class DAWaresContainer extends DABasicModule {
     }
 
     @Override
-    public void init(DAWareClassMap map) {
-        content.init(map);
+    public void init(DAWareTypeTree tree) {
+        content.init(tree);
     }
 
     /**
@@ -263,15 +262,10 @@ public class DAWaresContainer extends DABasicModule {
 //    }
 
     @Override
-    public DAWare.SubType getSubType() {
-        return DAWare.SubType.DAWaresContainer;
-    }
-
-    @Override
     public void toStream(DataOutputStream stream) throws IOException {
         stream.writeByte(VERSION);
 
-        stream.writeUTF(content.getSubType().toString());
+        stream.writeUTF(content.getClass().getName());
         content.toStream(stream);
     }
 
@@ -288,11 +282,7 @@ public class DAWaresContainer extends DABasicModule {
         try {
             Class<?> c = Class.forName(stream.readUTF());
             acontent = (IDAWare) ((IDAWare) c.newInstance()).fromStream(stream);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
 

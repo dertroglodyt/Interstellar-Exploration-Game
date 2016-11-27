@@ -53,8 +53,8 @@ public class DAValue<Q extends Quantity> extends DataAtom {
         // todo nötig?
         final String v = value.replace("[", "")
                 .replace("]", "")
-                .replace(".", "")
-                .replace(",", ".")
+//                .replace(".", "")
+//                .replace(",", ".")
                 .replace("1/", " /");
 //        final int x = v.indexOf(' ');
 //        if (x > 0) {
@@ -83,7 +83,8 @@ public class DAValue<Q extends Quantity> extends DataAtom {
 
     @Override
     public String toString() {
-        return value.toString().replace('.', ',').replace(" /", "1/").trim();
+        return value.toString();
+//        return value.toString().replace('.', ',').replace(" /", "1/").trim();
     }
 
     public String getValueString() {
@@ -121,7 +122,7 @@ public class DAValue<Q extends Quantity> extends DataAtom {
     }
 
     public DAValue<? extends Q> toBaseUnit() {
-        Unit u = value.getUnit().getStandardUnit();
+        final Unit u = value.getUnit().getStandardUnit();
         return new DAValue<>(value.to(u, MC));
     }
 
@@ -150,23 +151,32 @@ public class DAValue<Q extends Quantity> extends DataAtom {
     }
 
     public DAValue<? extends Quantity> mul(DAValue<?> other) {
-        BigDecimal bd = value.getValue().multiply(other.value.getValue(), MC);
+        final BigDecimal bd = value.getValue().multiply(other.value.getValue(), MC);
         return new DAValue<>(bd, getUnit().times(other.getUnit()));
     }
 
     public DAValue<? extends Quantity> div(DAValue<?> other) {
-        BigDecimal bd = value.getValue().divide(other.value.getValue(), MC);
+        final BigDecimal bd = value.getValue().divide(other.value.getValue(), MC);
         return new DAValue<>(bd, getUnit().divide(other.getUnit()));
     }
 
+    public DAValue<Q> scale(double x) {
+        return new DAValue<Q>(BigDecimal.valueOf(doubleValue(getUnit()) * x), getUnit());
+    }
+
+    public DAValue<Q> scale(DAValue<? extends Dimensionless> x) {
+        final BigDecimal bd = value.getValue().multiply(x.value.getValue(), MC);
+        return new DAValue<Q>(bd, getUnit());
+    }
+
     public DAValue<? extends Quantity> sqr() {
-        BigDecimal bd = value.getValue().pow(2, MC);
+        final BigDecimal bd = value.getValue().pow(2, MC);
         return new DAValue<>(bd, getUnit().times(getUnit()));
     }
 
     // todo not exactly correct unit
     public DAValue<? extends Quantity> sqrt() {
-        BigDecimal bd = value.getValue().pow(-2, MC);
+        final BigDecimal bd = value.getValue().pow(-2, MC);
         return new DAValue<>(bd, Dimensionless.UNIT);
     }
 

@@ -1,12 +1,20 @@
 /*
+ *  Created by DerTroglodyt on 2016-11-27 01:27
+ *  Email dertroglodyt@gmail.com
+ *  Copyright by HDC, Germany
+ */
+
+/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.hdc.commonlibrary.data.quantity;
 
 import org.jscience.economics.money.Currency;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
+
 import javax.measure.quantity.Angle;
 import javax.measure.quantity.AngularVelocity;
 import javax.measure.unit.NonSI;
@@ -17,7 +25,7 @@ import javax.measure.unit.Unit;
  *
  * @author martin
  */
-public class NewUnits {
+public final class NewUnits {
 
     public static final Unit<Pieces> PIECES = Pieces.UNIT;
 //    public static final Unit<HitPoints> HITPOINTS = HitPoints.UNIT;
@@ -40,9 +48,10 @@ public class NewUnits {
     }
 
     private NewUnits() {
+        super();
     }
 
-    private static final List<Unit<?>> LIST = new Vector<Unit<?>>();
+    private static final List<Unit<?>> LIST = new ArrayList<>(6);
 
     static {
         LIST.add(PIECES);

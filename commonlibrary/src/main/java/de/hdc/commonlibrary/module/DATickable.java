@@ -4,8 +4,6 @@
 
 package de.hdc.commonlibrary.module;
 
-import android.support.annotation.NonNull;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -25,35 +23,31 @@ import de.hdc.commonlibrary.util.StopWatch;
  *
  * @author dertroglodyt
  */
-public class DAModule implements IDataAtom {
+public abstract class DATickable implements IDataAtom {
 
-    public final DAUniqueID id;
-
-    // Only used for deserialisation.
-    @Deprecated
-    public DAModule() {
+    protected DATickable() {
         super();
-        id = DAUniqueID.createRandom();
+        timerID = DAUniqueID.createRandom();
         elapsed = DAValue.create(0, SI.SECOND);
     }
 
-    public DAModule(DAUniqueID id, DAValue<Duration> elapsed) {
-        super();
-        this.id = id;
-        this.elapsed = elapsed;
-    }
+//    public DATickable(DAUniqueID id, DAValue<Duration> elapsed) {
+//        super();
+//        this.timerID = id;
+//        this.elapsed = elapsed;
+//    }
 
     @Override
     public String toString() {
-        return "Module: " + id + " (" + elapsed.toString() + ")";
+        return "Module: " + timerID + " (" + elapsed.toString() + ")";
     }
 
     public final void tick(DAValue<Duration> timeSinceLastTick) {
-        StopWatch.start(id);
+        StopWatch.start(timerID);
         tickImpl(timeSinceLastTick);
         lock.lock();
         try {
-            elapsed = elapsed.add(StopWatch.elapsed(id));
+            elapsed = elapsed.add(StopWatch.elapsed(timerID));
         } finally {
             lock.unlock();
         }
@@ -70,27 +64,29 @@ public class DAModule implements IDataAtom {
     }
 
     @Override
-    public void toStream(@NonNull DataOutputStream stream) throws IOException {
+    public void toStream(DataOutputStream stream) throws IOException {
         stream.writeByte(VERSION);
-        id.toStream(stream);
+        timerID.toStream(stream);
         elapsed.toStream(stream);
     }
 
     @Override
-    public DAModule fromStream(DataInputStream stream) throws IOException {
+    public DATickable fromStream(DataInputStream stream) throws IOException {
         final byte v = stream.readByte();
-        final DAUniqueID id = new DAUniqueID().fromStream(stream);
-        final DAValue<Duration> val = new DAValue().<Duration>fromStream(stream);
-        return new DAModule(id, val);
+        timerID = new DAUniqueID().fromStream(stream);
+        elapsed = new DAValue<Duration>().<Duration>fromStream(stream);
+        return this;
     }
 
-    protected void tickImpl(DAValue<Duration> timeSinceLastTick) {
-        throw new IllegalAccessError();
-    }
+    /**
+     * Must be implemented by extending class.
+     */
+    protected abstract void tickImpl(DAValue<Duration> timeSinceLastTick);
 
     private static final byte VERSION = 1;
 
-    private final transient Lock lock = new ReentrantLock();
+    private DAUniqueID timerID;
     private DAValue<Duration> elapsed = DAValue.create(0, SI.SECOND);
+    private final transient Lock lock = new ReentrantLock();
 
 }

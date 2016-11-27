@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Quantity;
@@ -73,7 +74,7 @@ public class DAVector<Q extends Quantity> extends DataAtom {
             return -1;
         }
         for (int i = 0; i < vector.size(); i++) {
-            if (0 == vector.get(i).doCompare((((DAVector<?>) o).vector.get(i)))) {
+            if (0 != vector.get(i).doCompare((((DAVector<?>) o).vector.get(i)))) {
                 return -1;
             }
         }
@@ -91,7 +92,8 @@ public class DAVector<Q extends Quantity> extends DataAtom {
     @Override
     public void toStream(DataOutputStream stream) throws IOException {
         stream.writeByte(VERSION);
-        stream.write(vector.size());
+
+        stream.writeByte(vector.size());
         for (DAValue<Q> v : vector) {
             v.toStream(stream);
         }
@@ -103,26 +105,27 @@ public class DAVector<Q extends Quantity> extends DataAtom {
         if (v < 1) {
             throw new IllegalArgumentException("Invalid version number " + v);
         }
-        final int x = stream.readInt();
+        final int x = stream.readByte();
         List<DAValue<Q>> avector = new ArrayList<DAValue<Q>>(x);
-        for (int i = x; i < x; i++) {
+        for (int i = 0; i < x; i++) {
             avector.add(new DAValue().fromStream(stream));
         }
-        return new DAVector<Q>(vector);
+        return new DAVector<Q>(avector);
     }
 
     private static final byte VERSION = 1;
 
-    private final ArrayList<DAValue<Q>> vector;
+    private final CopyOnWriteArrayList<DAValue<Q>> vector;
 
-    private DAVector() {
+    @Deprecated
+    public DAVector() {
         super();
-        throw new IllegalAccessError();
+        vector = null;
     }
 
     private DAVector(Unit<Q> unit, BigDecimal... values) {
         super();
-        vector = new ArrayList<DAValue<Q>>(values.length);
+        vector = new CopyOnWriteArrayList<DAValue<Q>>();
         for (BigDecimal v : values) {
             vector.add(DAValue.create(v, unit));
         }
@@ -130,7 +133,7 @@ public class DAVector<Q extends Quantity> extends DataAtom {
 
     private DAVector(Unit<Q> unit, double... values) {
         super();
-        vector = new ArrayList<DAValue<Q>>(values.length);
+        vector = new CopyOnWriteArrayList<DAValue<Q>>();
         for (double v : values) {
             vector.add(DAValue.create(BigDecimal.valueOf(v), unit));
         }
@@ -138,13 +141,13 @@ public class DAVector<Q extends Quantity> extends DataAtom {
 
     private DAVector(List<DAValue<Q>> values) {
         super();
-        vector = new ArrayList<>(values.size());
+        vector = new CopyOnWriteArrayList<>();
         vector.addAll(values);
     }
 
     private DAVector(DAValue<Q>... values) {
         super();
-        vector = new ArrayList<>(values.length);
+        vector = new CopyOnWriteArrayList<>();
         Collections.addAll(vector, values);
     }
 

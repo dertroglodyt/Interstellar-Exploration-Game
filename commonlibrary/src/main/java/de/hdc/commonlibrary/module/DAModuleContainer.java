@@ -6,17 +6,18 @@
 
 package de.hdc.commonlibrary.module;
 
-import java.util.ArrayList;
-
 import javax.measure.quantity.Duration;
 import javax.measure.quantity.Energy;
+import javax.measure.quantity.Mass;
 import javax.measure.unit.SI;
 
+import de.hdc.commonlibrary.data.atom.DAArray;
+import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.quantity.Pieces;
 import de.hdc.commonlibrary.market.DAWare;
 import de.hdc.commonlibrary.market.DAWareClass;
-import de.hdc.commonlibrary.market.DAWareClassMap;
+import de.hdc.commonlibrary.market.DAWareTypeTree;
 
 /**
  * Entity (like a ship or a station) that contains modules.
@@ -27,39 +28,37 @@ import de.hdc.commonlibrary.market.DAWareClassMap;
 @SuppressWarnings("serial")
 public class DAModuleContainer extends DABasicModule {
 
-//    static {
-//        DVCBasicDataModel.register(DAModuleContainer.class, createImageIcon("/datavault/common/space/icon/DAModuleContainer.gif"));
-//    }
-
+    protected final transient DAValue<Energy> actEnergyNeed;
+    protected final transient DAGoodFlowList combinedGoodFlows;
+    protected final transient DAArray<DABasicModule> allModules;
     /**
-     * Modules are kept as child nodes in DATree.
-     * Duplicated here for quick access.
+     * Modules duplicated here for quick access.
      */
-    protected transient final DAValue<Energy> actEnergy;
-    protected transient final DAGoodFlowList combinedGoodFlows;
-    protected transient final ArrayList<DABasicModule> allModules;
-//    protected transient final DAVector<DAbmPropulsion> engines;
-//    protected transient final DAVector<DAbmStorage> storages;
-//    protected transient final DAVector<DAbmRentableStorage> rentStorages;
-//    protected transient final DAVector<DAbmHangar> hangars;
-//    protected transient final DAVector<DAbmWeapon> weapons;
-    protected transient final ArrayList<DAAbstractTank> tanks;
-//    protected transient final DAVector<DAbmFactory> factories;
+//    protected transient final DAArray<DAbmPropulsion> engines;
+    protected transient final DAArray<DAStorage> storages;
+    protected transient final DAArray<DARentableStorage> rentStorages;
+//    protected transient final DAArray<DAbmHangar> hangars;
+//    protected transient final DAArray<DAbmWeapon> weapons;
+    protected final transient DAArray<DAAbstractTank> tanks;
+//    protected transient final DAArray<DAbmFactory> factories;
 
-    private transient final TankPool tankPool;
+    private final transient TankPool tankPool;
 
     @Deprecated
     public DAModuleContainer() {
         super();
-        actEnergy = null;
+//        moduleType = ModuleType.NONE;
+        actEnergyNeed = null;
         combinedGoodFlows = null;
         allModules = null;
+        storages = null;
+        rentStorages = null;
         tanks = null;
         tankPool = null;
     }
 //    public DAModuleContainer(DABasicModuleClass aWareClass) {
 //        super(aWareClass);
-//        actEnergy = new DAValue<Energy>(0, SI.JOULE);
+//        actEnergyNeed = new DAValue<Energy>(0, SI.JOULE);
 //        combinedGoodFlows = new DAGoodFlowList();
 ////            combinedGoodFlows.set(DAResourcePool.ELECTRICAL_POWER, new DAPVEnergy(0, DAUnit.KnownUnit.J));
 //        allModules = new ArrayList<DABasicModule>();
@@ -76,10 +75,10 @@ public class DAModuleContainer extends DABasicModule {
 //    }
 
     @Override
-    public void init(DAWareClassMap map, DABasicModule parent) {
-        super.init(map, parent);
+    public void init(DAWareTypeTree tree, DABasicModule parent) {
+        super.init(tree, parent);
         for (DABasicModule bm : allModules) {
-            bm.init(map, this);
+            bm.init(tree, this);
         }
     }
 
@@ -145,7 +144,7 @@ public class DAModuleContainer extends DABasicModule {
 //            physical.setMassCenter(new Vector3d());
 //            physical.clearMass();
 ////            physical.clearVolume();
-//            actEnergy.setValueForced(0);
+//            actEnergyNeed.setValueForced(0);
 //            combinedGoodFlows.removeAll();
 ////            combinedGoodFlows.set(DAResourcePool.ELECTRICAL_POWER, new DAPVEnergy(0, DAUnit.KnownUnit.J));
 //            for (DABasicModule m : allModules) {
@@ -160,7 +159,7 @@ public class DAModuleContainer extends DABasicModule {
 //                    pm.scale(m.getMassKG());
 //                    physical.getMassCenter().add(pm);
 //                    if (m.isOnline()) {
-//                        actEnergy.addTo(m.getOnlinePower());
+//                        actEnergyNeed.addTo(m.getOnlinePower());
 //                    }
 //                    combinedGoodFlows.add(m.getGoodFlows());
 //                    pm = null;
@@ -205,28 +204,28 @@ public class DAModuleContainer extends DABasicModule {
 //        physical.addMass(m.getMassKG());
 //            physical.addVolume(m.getVolumeM3());
         if (m.isOnline()) {
-            actEnergy.add(m.getOnlinePower());
+            actEnergyNeed.add(m.getOnlinePower());
         }
 ////            combinedGoodFlows.add(m.getGoodFlows());
 //        if (m instanceof DAbmPropulsion) {
 //            engines.add((DAbmPropulsion) m);
 //        }
-//        if (m instanceof DAbmStorage) {
-//            storages.add((DAbmStorage) m);
-//        }
-//        if (m instanceof DAbmRentableStorage) {
-//            rentStorages.add((DAbmRentableStorage) m);
-//        }
+        if (m.moduleType == ModuleType.STORAGE) {
+            storages.add((DAStorage) m);
+        }
+        if (m.moduleType == ModuleType.RENTABLE_STORAGE) {
+            rentStorages.add((DARentableStorage) m);
+        }
 //        if (m instanceof DAbmHangar) {
 //            hangars.add((DAbmHangar) m);
 //        }
 //        if (m instanceof DAbmWeapon) {
 //            weapons.add((DAbmWeapon) m);
 //        }
-//        if (m instanceof DAAbstractTank) {
-//            tanks.add((DAAbstractTank) m);
-//            tankPool.add((DAAbstractTank) m);
-//        }
+        if (m.moduleType == ModuleType.TANK) {
+            tanks.add((DAAbstractTank) m);
+            tankPool.add((DAAbstractTank) m, m.getWareClass().typeID);
+        }
 //        if (m instanceof DAbmFactory) {
 //            factories.add((DAbmFactory) m);
 //        }
@@ -241,56 +240,57 @@ public class DAModuleContainer extends DABasicModule {
 //        physical.removeMass(m.getMassKG());
 //            physical.removeVolume(m.getVolumeM3());
         if (m.isOnline()) {
-            actEnergy.sub(m.getOnlinePower());
+            actEnergyNeed.sub(m.getOnlinePower());
         }
 ////            combinedGoodFlows.subtract(m.getGoodFlows());
 //        if (m instanceof DAbmPropulsion) {
 //            engines.remove((DAbmPropulsion) m);
 //        }
-//        if (m instanceof DAbmStorage) {
-//            storages.remove((DAbmStorage) m);
-//        }
-//        if (m instanceof DAbmRentableStorage) {
-//            rentStorages.remove((DAbmRentableStorage) m);
-//        }
+        if (m.moduleType == ModuleType.STORAGE) {
+            storages.remove((DAStorage) m);
+        }
+        if (m.moduleType == ModuleType.RENTABLE_STORAGE) {
+            rentStorages.remove((DARentableStorage) m);
+        }
 //        if (m instanceof DAbmHangar) {
 //            hangars.remove((DAbmHangar) m);
 //        }
 //        if (m instanceof DAbmWeapon) {
 //            weapons.remove((DAbmWeapon) m);
 //        }
-//        if (m instanceof DAAbstractTank) {
-//            tanks.remove((DAAbstractTank) m);
-//            tankPool.remove((DAAbstractTank) m, typeID);
-//        }
+        if (m instanceof DAAbstractTank) {
+            tanks.remove((DAAbstractTank) m);
+            tankPool.remove((DAAbstractTank) m, m.getWareClass().typeID);
+        }
 //        if (m instanceof DAbmFactory) {
 //            factories.remove((DAbmFactory) m);
 //        }
         internalRecalc();
     }
 
-    public ArrayList<DABasicModule> getModules() {
+    // todo should be iterator
+    public DAArray<DABasicModule> getModules() {
         return allModules;
     }
 
-//    public DABasicModule getModule(DAUniqueID id) {
-//        for (DABasicModule bm : allModules) {
-//            if (bm.getItemID().equals(id)) {
-//                return bm;
-//            }
-//            if (bm instanceof DAbmRentableStorage) {
-//                DAbmStorage s = ((DAbmRentableStorage) bm).getStorageByModuleID(id);
-//                if (s != null) {
-//                    return s;
-//                }
-//            }
-//        }
-//        return null;
-//    }
-//
-//    public DAbmWaresContainer getContainer(DAUniqueID id) {
-//        for (DAbmStorage sto : getStorages()) {
-//            for (DAbmWaresContainer wc : sto.getContainers()) {
+    public DABasicModule getModule(DAUniqueID id) {
+        for (DABasicModule bm : allModules) {
+            if (bm.getItemID().equals(id)) {
+                return bm;
+            }
+            if (bm.moduleType == ModuleType.RENTABLE_STORAGE) {
+                DAStorage s = ((DARentableStorage) bm).getStorageByModuleID(id);
+                if (s != null) {
+                    return s;
+                }
+            }
+        }
+        return null;
+    }
+
+//    public DAWaresContainer getContainer(DAUniqueID id) {
+//        for (DAStorage sto : getStorages()) {
+//            for (DAWaresContainer wc : sto.getContainers()) {
 //                if (wc.getItemID().equals(id)) {
 //                    return wc;
 //                }
@@ -318,10 +318,10 @@ public class DAModuleContainer extends DABasicModule {
 //    public ArrayList<DAbmWeapon> getWeapons() {
 //        return weapons;
 //    }
-
-    public ArrayList<DAAbstractTank> getTanks() {
-        return tanks;
-    }
+//
+//    public DAArray<DAAbstractTank> getTanks() {
+//        return tanks;
+//    }
 
 //    public ArrayList<DAbmFactory> getFactories() {
 //        return factories;
@@ -334,10 +334,9 @@ public class DAModuleContainer extends DABasicModule {
     @Override
     public DAValue<Energy> getPowerConsumption() {
         if (isOnline()) {
-            return actEnergy;
-        } else {
-            return DAValue.<Energy>create(0, SI.JOULE);
+            return actEnergyNeed;
         }
+        return DAValue.<Energy>create(0, SI.JOULE);
     }
 
     @Override
@@ -365,21 +364,14 @@ public class DAModuleContainer extends DABasicModule {
         return combinedGoodFlows;
     }
 
-//    @Override
-//    public DAValue<Mass> getTotalMass() {
-//        DAValue<Mass> m = getTotalMass();
-//        for (DABasicModule bm : allModules) {
-//            m = m.add(bm.getTotalMass());
-//        }
-//        return m;
-//    }
-
-//    @Override
-//    public DVCDataEditor getEditor(DVCDataEditor.EditMode editmode, DVCAbstractUser user, boolean visible) {
-//        DVCDataEditor de = new DVCseModuleContainer(this, editmode, user, visible);
-//        addListener(de);
-//        return de;
-//    }
+    @Override
+    public DAValue<Mass> getMass() {
+        DAValue<Mass> m = getWareClass().mass;
+        for (DABasicModule bm : allModules) {
+            m = m.add(bm.getMass());
+        }
+        return m;
+    }
 
 //    @Override
 //    public void longTick(DADateTime actWorldTime, DAValue<Duration> t) {
@@ -455,63 +447,6 @@ public class DAModuleContainer extends DABasicModule {
 //        throw new UnsupportedOperationException();
 //    }
 
-//    @Override
-//    public DVCDataEditor getEditor(EditMode editmode, DVCAbstractUser user) {
-//        DVCseModuleContainer de = new DVCseModuleContainer(this, editmode, user);
-//        addListener(de);
-//        return de;
-//    }
-//
-//    public static DVCDataEditor getParentEditor(DAModuleContainer model, EditMode editmode, DVCAbstractUser user) {
-//        DVCseBasicModule de = new DVCseBasicModule(model, editmode, user);
-//        model.addListener(de);
-//        return de;
-//    }
-
-//    @Override
-//    public void addRemoteListener(IDVCRemoteDataModel rl) {
-//        if (remoteListener == null) {
-//            DVCErrorHandler.raiseError(DAResult.createWarning("remoteListener not initialized!"
-//                    , "DAModuleContainer.addRemoteListener"));
-//            return;
-//        }
-//        remoteListener.add(rl);
-//    }
-//
-//    @Override
-//    public void removeRemoteListener(IDVCRemoteDataModel rl) {
-//        if (remoteListener == null) {
-//            DVCErrorHandler.raiseError(DAResult.createWarning("remoteListener not initialized!"
-//                    , "DAModuleContainer.removeRemoteListener"));
-//            return;
-//        }
-//        remoteListener.remove(rl);
-//    }
-//
-//    @Override
-//    public void notifyRemoteListener(DAOwningThread newOwner) {
-//        if (remoteListener == null) {
-//            DVCErrorHandler.raiseError(DAResult.createWarning("notifyListener not initialized!"
-//                    , "DAModuleContainer.addRemoteListener"));
-//            return;
-//        }
-//        for (IDVCRemoteDataModel rd : remoteListener) {
-//            rd.ownerChanged(newOwner);
-//        }
-//    }
-//
-//    @Override
-//    public void notifyRemoteListener(DVCBasicDataModel newData) {
-//        if (remoteListener == null) {
-//            DVCErrorHandler.raiseError(DAResult.createWarning("notifyListener not initialized!"
-//                    , "DAModuleContainer.addRemoteListener"));
-//            return;
-//        }
-//        for (IDVCRemoteDataModel rd : remoteListener) {
-//            rd.dataChanged(newData);
-//        }
-//    }
-//
     // TODO
 //    public void processShipYardActiona(DAVector<DAShipYardAction> actions) {
 //        for (DAShipYardAction sya : actions) {
@@ -538,19 +473,8 @@ public class DAModuleContainer extends DABasicModule {
 //        }
 //    }
 
-//    @Override
-//    public DAModuleContainer clone() {
-//        DAModuleContainer s = new DAModuleContainer(wareClass);
-////        s.setID(getItemID());
-//        for (DABasicModule bm : allModules) {
-//            s.addModule(bm.clone());
-//        }
-////        s.resolve(worldNode);
-//        return s;
-//    }
-
     @Override
-    public void init(DAWareClassMap map) {
+    public void init(DAWareTypeTree tree) {
 
     }
 

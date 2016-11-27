@@ -29,7 +29,7 @@ import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.compound.DAResult;
 import de.hdc.commonlibrary.data.quantity.Pieces;
 import de.hdc.commonlibrary.market.DAWareClass;
-import de.hdc.commonlibrary.market.DAWareClassMap;
+import de.hdc.commonlibrary.market.DAWareTypeTree;
 import de.hdc.commonlibrary.market.IDAWare;
 import de.hdc.commonlibrary.moduleclass.DABasicModuleClass;
 import de.hdc.commonlibrary.util.Log;
@@ -38,7 +38,7 @@ import de.hdc.commonlibrary.util.Log;
  *
  * @author martin
  */
-public abstract class DABasicModule extends DAModule implements IDAWare {
+public abstract class DABasicModule extends DATickable implements IDAWare {
 
     public enum State {
         /**
@@ -63,6 +63,12 @@ public abstract class DABasicModule extends DAModule implements IDAWare {
         GOING_OFFLINE;
     }
 
+    public enum ModuleType {
+        NONE, PROPULSION, STORAGE, RENTABLE_STORAGE, HANGAR, WEAPON, TANK, CABIN, FACTORY, BACKBONE
+        , CONVERTER, WARES_CONTAINER, SHIP
+    }
+
+    protected ModuleType moduleType;
     /**
      * Needed to restore ware class after serialisation
      */
@@ -112,6 +118,7 @@ public abstract class DABasicModule extends DAModule implements IDAWare {
     @Deprecated
     public DABasicModule() {
         super();
+        moduleType = ModuleType.NONE;
         classID = null;
         itemID = null;
         itemName = null;
@@ -121,8 +128,8 @@ public abstract class DABasicModule extends DAModule implements IDAWare {
         lastError = null;
     }
 
-    public void init(DAWareClassMap map, DABasicModule parent) {
-        wareClass = (DABasicModuleClass) map.get(classID);
+    public void init(DAWareTypeTree tree, DABasicModule parent) {
+        wareClass = (DABasicModuleClass) tree.getWareClass(classID);
         if (wareClass == null) {
             throw new IllegalArgumentException("DABasicModule: Unknown DAWareClass!");
         }
@@ -130,7 +137,7 @@ public abstract class DABasicModule extends DAModule implements IDAWare {
     }
 
     public DAModuleContainer getParentContainer() {
-        DAModule m = parentModule;
+        DATickable m = parentModule;
         while (! (m instanceof DAModuleContainer) && (m != null)) {
             m = parentModule.parentModule;
         }
@@ -430,10 +437,17 @@ public abstract class DABasicModule extends DAModule implements IDAWare {
 
     private static final byte VERSION = 1;
 
-    protected DABasicModule(State state, DAValue<Duration> delayToGo, DAValue<Energy> actHitPoints
-            , DAResult<?> lastError, DAUniqueID wareClassID, DAUniqueID itemID, DAText itemName
-            , DAUniqueID parentClassID) {
+    protected DABasicModule(State state, ModuleType type, DAValue<Duration> delayToGo
+            , DAValue<Energy> actHitPoints, DAUniqueID wareClassID, DAText itemName) {
+        this(state, type, delayToGo, actHitPoints, DAResult.createOK("", DAWareClass.class.getName())
+                , wareClassID, DAUniqueID.createRandom(), itemName);
+    }
+
+    protected DABasicModule(State state, ModuleType type, DAValue<Duration> delayToGo
+            , DAValue<Energy> actHitPoints, DAResult<?> lastError, DAUniqueID wareClassID
+            , DAUniqueID itemID, DAText itemName) {
         super();
+        this.moduleType = type;
         this.classID = wareClassID;
         this.itemID = itemID;
         this.itemName = itemName;

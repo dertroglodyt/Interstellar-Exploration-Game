@@ -174,22 +174,27 @@ public final class DAWareTypeTreeBootstrap {
     public static final DAWareTypeTreeNode UNKNOWN = DAWareTypeTreeNode.create(null, DAText.create("Unknown")
             , DAText.create("NOT a valid DVCsmWaresType!"));
 
-    public static void create() {
+    public static DAWareTypeTreeNode create() {
         final DAWareTypeTreeNode root = DAWareTypeTreeNode.create(null, DAText.create("Root node.")
                 , DAText.create("You should never see this!"));
         for (DefWaresTree dwf : DefWaresTree.values()) {
+//            System.out.println(dwf.name() + "###" + dwf.path);
             if (dwf.path.isEmpty()) {
                 root.addChild(DAWareTypeTreeNode.create(root, dwf.displayName, dwf.description, dwf.id));
             } else {
-                final DAText parentName = DAText.create(dwf.path.substring(0, dwf.path.indexOf(' ')));
+                String pn = dwf.path.substring(1);
+                pn = pn.substring(0, pn.indexOf('/'));
+                final DAText parentName = DAText.create(pn);
                 final DAWareTypeTreeNode parent = root.findChildByName(parentName);
                 parent.addChild(DAWareTypeTreeNode.create(parent, dwf.displayName, dwf.description, dwf.id));
             }
         }
         for (DefWareClass t : DefWareClass.values()) {
+//            System.out.println(t.displayName);
             DAWareTypeTreeNode parent = root.findChild(t.typeID);
             parent.addWareClass(DAWareClass.create(t.fClassID, t.typeID, t.displayName));
         }
+        return root;
     }
 
     private DAWareTypeTreeBootstrap() {

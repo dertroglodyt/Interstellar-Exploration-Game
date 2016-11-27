@@ -11,11 +11,27 @@
 
 package de.hdc.commonlibrary.market;
 
+import org.jscience.economics.money.Money;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import javax.measure.quantity.Dimensionless;
+import javax.measure.unit.NonSI;
+
+import de.hdc.commonlibrary.data.atom.DAArray;
+import de.hdc.commonlibrary.data.atom.DAText;
+import de.hdc.commonlibrary.data.atom.DAUniqueID;
+import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.atom.DataAtom;
+import de.hdc.commonlibrary.data.compound.DAResult;
+import de.hdc.commonlibrary.data.quantity.Pieces;
+import de.hdc.commonlibrary.module.DABasicModule;
+import de.hdc.commonlibrary.module.DAModuleContainer;
+import de.hdc.commonlibrary.module.DAShip;
+import de.hdc.commonlibrary.module.DAStorage;
+import de.hdc.commonlibrary.util.Log;
 
 /**
  * A market is located at a station and run by a clanID.
@@ -24,419 +40,297 @@ import de.hdc.commonlibrary.data.atom.DataAtom;
  */
 public class DAMarket extends DataAtom {
 
-//    private static final long serialVersionUID = SerialUIDPool.UID.DAMarket.value();
-//
-//    public static enum Parameters implements IParameterType {
-//
-//        NONE(null),
-//        SHIPID(DAUniqueID.class),
-//        ORDERS(DAVector.class),
-//        WARE(DAWare.class),
-//        WARESTYPE(DAWaresType.class),
-//        STORAGEID(DAUniqueID.class),
-//        ORDER(DAOrder.class),
-//        AMOUNT(DAValue.class),
-//        CONTAINER(de.dertroglodyt.iegcommon.module.DAbmWaresContainer.class),
-//        CONTAINERLIST(DAVector.class),
-//        SCRIPT_ID(DAUniqueID.class),
-//        ;
-//
-//        private DALine name;
-//        private Class<? extends DataAtom> c;
-//
-//        Parameters(Class<? extends DataAtom> aClass) {
-//            name = new DALine(this.toString());
-//            c = aClass;
-//        }
-//
-//        @Override
-//        public DALine getName() {
-//            return name;
-//        }
-//
-//        @Override
-//        public Class<? extends DataAtom> getType() {
-//            return c;
-//        }
-//
-//    }
-//
-//    public static enum Action implements IRemoteActionType {
-//        ADD_ORDERS(Parameters.NONE, Parameters.SHIPID, Parameters.ORDERS),
-//        REMOVE_ORDERS(Parameters.NONE, Parameters.SHIPID, Parameters.ORDERS),
-//        GET_BUYING(Parameters.ORDERS, Parameters.SHIPID),
-//        GET_SELLING(Parameters.ORDERS, Parameters.SHIPID),
-//        GET_BUYING_W(Parameters.ORDERS, Parameters.SHIPID, Parameters.WARE),
-//        GET_SELLING_W(Parameters.ORDERS, Parameters.SHIPID, Parameters.WARE),
-//        GET_BUYING_WT(Parameters.ORDERS, Parameters.SHIPID, Parameters.WARESTYPE),
-//        GET_SELLING_WT(Parameters.ORDERS, Parameters.SHIPID, Parameters.WARESTYPE),
-//        BUY(Parameters.NONE, Parameters.SHIPID, Parameters.STORAGEID, Parameters.ORDER, Parameters.AMOUNT, Parameters.SCRIPT_ID),
-//        SELL(Parameters.NONE, Parameters.SHIPID, Parameters.STORAGEID, Parameters.ORDER, Parameters.CONTAINERLIST, Parameters.SCRIPT_ID),
-//        SPLIT(Parameters.CONTAINER, Parameters.SHIPID, Parameters.STORAGEID, Parameters.CONTAINER, Parameters.AMOUNT),
-//        ;
-//
-//        private DALine name;
-//        private ArrayList<IParameterType> input;
-//        private IParameterType result;
-//
-//        Action(IParameterType r, IParameterType... in) {
-//            name = new DALine(this.toString());
-//            input = new ArrayList<IParameterType>(in.length);
-//            input.addAll(Arrays.asList(in));
-//            result = r;
-//        }
-//
-//        @Override
-//        public DALine getName() {
-//            return name;
-//        }
-//
-//        @Override
-//        public int getInputTypeSize() {
-//            return input.size();
-//        }
-//
-//        @Override
-//        public Iterator<IParameterType> getInputType() {
-//            return input.iterator();
-//        }
-//
-//        @Override
-//        public IParameterType getResultType() {
-//            return result;
-//        }
-//
-//    }
-//
-//    protected DALine marketName;
-//    protected final DAVector<DAOrder> orders;
-//    /**
-//     * Percent tax for placing buy or sell orders.
-//     */
-//    protected DAValue<Dimensionless> tax;
-//
-//    /**
-//     * Ship where this market is placed upon.
-//     */
-//    protected transient DAmcShip ship;
-////    private transient HashSet<IDVCRemoteDataModel> remoteListener;
-//
-//    @Override
-//    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-//        super.readExternal(in);
-//        byte version = in.readByte();
-//        // Do something different here if old version demands it
-//
-//        if ((version < 1) || (version > 1)) {
-//            throw new IllegalStateException("readExternal: Unknown version number <" + version + ">.");
-//        }
-//        marketName.readExternal(in);
-//        orders.readExternal(in);
-//        tax.readExternal(in);
-//    }
-//
-//    @Override
-//    public void writeExternal(ObjectOutput out) throws IOException {
-//        super.writeExternal(out);
-//        /**
-//         * The version number of the class to help distinguish isChanged read/write data formats.
-//         * It should be set in every "writeExternal" of every class.
-//         * It's value should only change if write-/readExternal are isChanged.
-//         */
-//        byte version = 1;
-//        out.writeByte(version);
-//
-//        marketName.writeExternal(out);
-//        orders.writeExternal(out);
-//        tax.writeExternal(out);
-//    }
-//
-//    @Deprecated
-//    public DAMarket() {
-//        this(new DALine("<unknown>"));
-//    }
-//
-//    public DAMarket(DALine aStationName) {
-//        super();
-//        this.marketName = aStationName;
-//        orders = new DAVector<DAOrder>(DAOrder.class);
-//        tax = new DAValue<Dimensionless>(10, NonSI.PERCENT);
-////        remoteListener = new HashSet<IDVCRemoteDataModel>(0);
-//    }
-//
-//    @Override
-//    public DAMarket getTestInstance() {
-//        throw new UnsupportedOperationException();
-//    }
-//
-//    @Override
-//    public String toString() {
-//        return marketName.toString();
-//    }
-//
-//    @Override
-//    public String toParseString(String levelTab) {
-//        return levelTab + toString();
-//    }
-//
-//    @Override
-//    public DAbmHangar parse(String value) {
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
-//
-//    public void init(DAmcShip aShip) {
-//        if (aShip == null) {
-//            Log.warn(DAMarket.class, "init: Parent ship is NULL!");
-//        }
-//        ship = aShip;
-////        for (DAOrder o : orders) {
-////            o.resolveOther(ship);
-////        }
-//    }
-//
-//    public DALine getMarketName() {
-//        return marketName;
-//    }
-//
-//    public DAModuleContainer getParentContainer() {
-//        return ship;
-//    }
-//
-//    public DAUniqueID getOwnerID() {
-//        return ship.getOwnerID();
-//    }
-//
+    public final DAUniqueID id;
+    public final DAText marketName;
+    public final DAArray<DAOrder> orders;
+    /**
+     * Percent tax for placing buy or sell orders.
+     */
+    public final DAValue<Dimensionless> tax;
+    /**
+     * Ship where this market is placed upon.
+     * The market is owned by the ship.
+     * The ship sets this to point back after deserialization of market.
+     */
+    private final transient DAShip ship;
+
+    public static final DAMarket create(DAShip parent, DAUniqueID id, DAText name, DAValue<Dimensionless> tax
+            , DAArray<DAOrder> orders) {
+        return new DAMarket(parent, id, name, tax, orders);
+    }
+
+    public static final DAMarket create(DAShip parent, DAUniqueID id, DAText name, DAValue<Dimensionless> tax) {
+        return new DAMarket(parent, id, name, tax, DAArray.create());
+    }
+
+    @Deprecated
+    public DAMarket() {
+        super();
+        id = null;
+        marketName = null;
+        orders = null;
+        tax = null;
+        ship = null;
+    }
+
+    public DAMarket(DAText aStationName, DAShip ship) {
+        super();
+        id = DAUniqueID.createRandom();
+        this.marketName = aStationName;
+        orders = DAArray.create();
+        tax = DAValue.create(10, NonSI.PERCENT);
+        this.ship = ship;
+    }
+
+    @Override
+    public String toString() {
+        return marketName.toString();
+    }
+
+    public void init(DAWareTypeTree tree) {
+        for (DAOrder o : orders) {
+            o.init(tree);
+        }
+    }
+
+    public DAText getMarketName() {
+        return marketName;
+    }
+
+    public DAValue<Dimensionless> getTax() {
+        return tax;
+    }
+
+    public DAModuleContainer getParentContainer() {
+        return ship;
+    }
+
+    public DAUniqueID getOwnerID() {
+        return ship.itemID;
+    }
+
 //    public void longTick(DADateTime actWorldTime) {
 //        for (DAOrder o : orders) {
 //            o.doFillup(actWorldTime, ship);
 //        }
 //    }
+
+    public DAResult<?> addOrder(DAOrder order) {
+        if (order == null) {
+            DAResult r = DAResult.createWarning("Order is NULL!", "DAMarket.addOrder");
+            Log.result(r);
+            return r;
+        }
+        orders.add(order);
+        return DAResult.createOK("ok", "DAMarket.addOrder");
+    }
 //
-//    public DAResult<?> addOrder(DAOrder order) {
-//        if (order == null) {
-//            DAResult r = DAResult.createWarning("Order is NULL!", "DAMarket.addOrder");
-//            Log.result(r);
-//            return r;
-//        }
-//        orders.add(order);
-//        notifyListener(this);
-//        return DAResult.createOK("ok", "DAMarket.addOrder");
-//    }
-//
-//    public DAResult addOrders(DAVector<DAOrder> vo) {
-//        if (vo == null) {
-//            DAResult r = DAResult.createWarning("Orders are NULL!", "DAMarket.addOrders");
-//            Log.result(r);
-//            return r;
-//        }
-//        orders.addAll(vo);
-//        notifyListener(this);
-//        return DAResult.createOK("ok", "DAMarket.addOrders");
-//    }
-//
-//    public DAResult removeOrder(DAOrder order) {
-//        orders.remove(order);
-//        notifyListener(this);
-//        return DAResult.createOK("ok", "DAMarket.removeOrder");
-//    }
-//
-//    public DAResult removeOrders(DAVector<DAOrder> vo) {
-//        orders.removeAll(vo);
-//        notifyListener(this);
-//        return DAResult.createOK("ok", "DAMarket.removeOrders");
-//    }
-//
-//    public DAVector<DAOrder> getBuying() {
-//        DAVector<DAOrder> vo = new DAVector<DAOrder>(DAOrder.class);
-//        for (DAOrder o : orders) {
-//            if (o.isBuyOrder()) {
-//                vo.add(o);
-//            }
-//        }
-//        return vo;
-//    }
-//
-//    public DAVector<DAOrder> getSelling() {
-//        DAVector<DAOrder> vo = new DAVector<DAOrder>(DAOrder.class);
-//        for (DAOrder o : orders) {
-//            if (o.isSellOrder()) {
-//                vo.add(o);
-//            }
-//        }
-//        return vo;
-//    }
-//
-//    public DAVector<DAOrder> getBuying(IDAWare w) {
-//        DAVector<DAOrder> vo = new DAVector<DAOrder>(DAOrder.class);
-//        for (DAOrder o : orders) {
-//            if (o.isBuyOrder() && o.containsWare(w)) {
-//                vo.add(o);
-//            }
-//        }
-//        return vo;
-//    }
-//
-//    public DAVector<DAOrder> getSelling(IDAWare w) {
-//        DAVector<DAOrder> vo = new DAVector<DAOrder>(DAOrder.class);
-//        for (DAOrder o : orders) {
-//            if (o.isSellOrder() && o.containsWare(w)) {
-//                vo.add(o);
-//            }
-//        }
-//        return vo;
-//    }
-//
-//    public DAVector<DAOrder> getBuying(DAWaresType wt) {
-//        DAVector<DAOrder> vo = new DAVector<DAOrder>(DAOrder.class);
-//        for (DAOrder o : orders) {
-//            if (o.isBuyOrder() && o.containsType(wt)) {
-//                vo.add(o);
-//            }
-//        }
-//        return vo;
-//    }
-//
-//    public DAVector<DAOrder> getSelling(DAWaresType wt) {
-//        DAVector<DAOrder> vo = new DAVector<DAOrder>(DAOrder.class);
-//        for (DAOrder o : orders) {
-//            if (o.isSellOrder() && o.containsType(wt)) {
-//                vo.add(o);
-//            }
-//        }
-//        return vo;
-//    }
-//
-//    private DAOrder findBuying(DAOrder order) {
-//        for (DAOrder o : orders) {
-//            if (o.isBuyOrder() && (o.compareTo(order) == 0)) {
-//                return o;
-//            }
-//        }
-//        return null;
-//    }
-//
-//    private DAOrder findSelling(DAOrder order) {
-//        for (DAOrder o : orders) {
-//            if (o.isSellOrder() && (o.compareTo(order) == 0)) {
-//                return o;
-//            }
-//        }
-//        return null;
-//    }
-//
-//    /**
-//     * Processes a sell order.
-//     * @param targetStorage
-//     * @param so
-//     * @param amount
-//     * @param scriptID
-//     * @return
-//     */
-//    public DAResult buy(DAbmStorage targetStorage, DAOrder so, DAValue<Pieces> amount, DAUniqueID scriptID) {
-//        synchronized (orders) {
-//            if (so == null) {
-//                return DAResult.createWarning("Order is NULL!.", "DAMarket.buy");
-//            }
-//            if (targetStorage == null) {
-//                return DAResult.createWarning("Storage is NULL!.", "DAMarket.buy");
-//            }
-//            if (amount == null) {
-//                return DAResult.createWarning("Amount is NULL!.", "DAMarket.buy");
-//            }
-//            if (! so.isSellOrder()) {
-//                return DAResult.createWarning("Not a sell order!.", "DAMarket.buy");
-//            }
-//            StackTraceElement[] ste = Thread.currentThread().getStackTrace();
-//            boolean scripted = false;
-//            for (StackTraceElement e : ste) {
-//                if (e.getClassName().contains("DAScriptCPU")) {
-//                    scripted = true;
+    public DAResult<?> addOrders(DAArray<DAOrder> vo) {
+        if (vo == null) {
+            final DAResult<?> r = DAResult.createWarning("Orders are NULL!", "DAMarket.addOrders");
+            Log.result(r);
+            return r;
+        }
+        for (final DAOrder o : vo) {
+            orders.add(o);
+        }
+        return DAResult.createOK("ok", "DAMarket.addOrders");
+    }
+
+    public DAResult<?> removeOrder(DAOrder order) {
+        orders.remove(order);
+        return DAResult.createOK("ok", "DAMarket.removeOrder");
+    }
+
+    public DAResult<?> removeOrders(DAArray<DAOrder> vo) {
+        for (final DAOrder o : vo) {
+            orders.remove(o);
+        }
+        return DAResult.createOK("ok", "DAMarket.removeOrders");
+    }
+
+    public DAArray<DAOrder> getBuying() {
+        DAArray<DAOrder> vo = DAArray.<DAOrder>create();
+        for (DAOrder o : orders) {
+            if (o.isBuyOrder()) {
+                vo.add(o);
+            }
+        }
+        return vo;
+    }
+
+    public DAArray<DAOrder> getSelling() {
+        final DAArray<DAOrder> vo = DAArray.<DAOrder>create();
+        for (DAOrder o : orders) {
+            if (o.isSellOrder()) {
+                vo.add(o);
+            }
+        }
+        return vo;
+    }
+
+    public DAArray<DAOrder> getBuying(IDAWare w) {
+        final DAArray<DAOrder> vo = DAArray.<DAOrder>create();
+        for (DAOrder o : orders) {
+            if (o.isBuyOrder() && o.containsWare(w)) {
+                vo.add(o);
+            }
+        }
+        return vo;
+    }
+
+    public DAArray<DAOrder> getSelling(IDAWare w) {
+        final DAArray<DAOrder> vo = DAArray.<DAOrder>create();
+        for (DAOrder o : orders) {
+            if (o.isSellOrder() && o.containsWare(w)) {
+                vo.add(o);
+            }
+        }
+        return vo;
+    }
+
+    public DAArray<DAOrder> getBuying(DAWareClass wareClass) {
+        final DAArray<DAOrder> vo = DAArray.<DAOrder>create();
+        for (DAOrder o : orders) {
+            if (o.isBuyOrder() && o.containsType(wareClass)) {
+                vo.add(o);
+            }
+        }
+        return vo;
+    }
+
+    public DAArray<DAOrder> getSelling(DAWareClass wareClass) {
+        final DAArray<DAOrder> vo = DAArray.<DAOrder>create();
+        for (DAOrder o : orders) {
+            if (o.isSellOrder() && o.containsType(wareClass)) {
+                vo.add(o);
+            }
+        }
+        return vo;
+    }
+
+    private DAOrder find(DAOrder order) {
+        for (DAOrder o : orders) {
+            if (o.isBuyOrder() && (o.compareTo(order) == 0)) {
+                return o;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Processes a sell order.
+     * @param targetStorage
+     * @param so
+     * @param amount
+     * @param scriptID
+     * @return
+     */
+    public DAResult<DAWare> buy(DAStorage targetStorage, DAOrder so, DAValue<Pieces> amount
+            , DAUniqueID scriptID, DAUserMap userMap) {
+        synchronized (orders) {
+            if (so == null) {
+                return DAResult.createWarning("Order is NULL!.", "DAMarket.buy");
+            }
+            if (targetStorage == null) {
+                return DAResult.createWarning("Storage is NULL!.", "DAMarket.buy");
+            }
+            if (amount == null) {
+                return DAResult.createWarning("Amount is NULL!.", "DAMarket.buy");
+            }
+            if (! so.isSellOrder()) {
+                return DAResult.createWarning("Not a sell order!.", "DAMarket.buy");
+            }
+            final StackTraceElement[] ste = Thread.currentThread().getStackTrace();
+            boolean scripted = false;
+            for (StackTraceElement e : ste) {
+                if (e.getClassName().contains("DAScriptCPU")) {
+                    scripted = true;
+                }
+                if (scripted) {
+                    Log.warn(DAMarket.class, "buy: DAClan.transaction() was invoced by " + ste[2].getClassName()
+                            + " Line: " + ste[2].getLineNumber() + " which is forbidden!");
+                    return DAResult.createWarning("Invocation allowed only by DAMarket!", "DAMarket.buy");
+                }
+            }
+            try {
+                if (ship.getModule(targetStorage.getItemID()) == null) {
+                    return DAResult.createWarning("Target storage is not a local storage.", "DAMarket.buy");
+                }
+                if (! amount.isPositiv()) {
+                    return DAResult.createWarning("No valid amount <" + amount.toString() + ">.", "DAMarket.buy");
+                }
+                if (amount.isGreaterThan(so.getAmount())) {
+                    return DAResult.createWarning("Amount bigger than sell order amount.", "DAMarket.buy");
+                }
+                DAWare wa = DAWare.create(so.ware, amount);
+                DAResult<DAWare> rf = targetStorage.canAddAmount(wa);
+                if (!rf.isOK()) {
+                    return DAResult.createFailed(rf.getMessage(), "DAMarket.buy");
+                }
+                DAOrganizationBasic buyer = userMap.get(targetStorage.getLeaserID());
+                if (buyer == null) {
+                    return DAResult.createWarning("No valid buyer found in WorldNode.", "DAMarket.buy");
+                }
+                DAStorage sto = (DAStorage) ship.getModule(so.storageID);
+                if (sto == null) {
+                    return DAResult.createWarning("Order source storage not found in ship.", "DAMarket.buy");
+                }
+                DAOrganizationBasic owner = userMap.get(sto.getLeaserID());
+                if (owner == null) {
+                    return DAResult.createWarning("No valid order owner found in WorldNode.", "DAMarket.buy");
+                }
+                DAOrder order = find(so);
+                if (order == null) {
+                    return DAResult.createFailed("Could not find requested ware in selling ware.", "DAMarket.buy");
+                }
+                DAValue<Money> price = so.price.scale(amount);
+                DAMarketTransaction smt = DAMarketTransaction.createBill(owner, buyer, so.toString(), price);
+                DAMarketTransaction bmt = DAMarketTransaction.createReceipt(owner, buyer, so.toString(), price);
+                // Wares are not stored in an actual storage any more!
+                // Instead the order holds the wares.
+//                if (! sto.remove(so.getSellAmount())) {
+//                    return DAResult.createFailed("Could not take requested ware from storage.", "DAMarket.buy");
 //                }
-//                if (scripted) {
-//                    Log.warn(DAbmHangar.class, "buy: DAClan.transaction() was invoced by " + ste[2].getClassName()
-//                            + " Line: " + ste[2].getLineNumber() + " which is forbidden!");
-//                    return DAResult.createWarning("Invocation allowed only by DAMarket!", "DAMarket.buy");
-//                }
-//            }
-//            try {
-//                if (ship.getModule(targetStorage.getItemID()) == null) {
-//                    return DAResult.createWarning("Target storage is not a local storage.", "DAMarket.buy");
-//                }
-//                if (amount.is(DAValue.Sign.NEGATIVE_OR_ZERO)) {
-//                    return DAResult.createWarning("No valid amount <" + amount.toString() + ">.", "DAMarket.buy");
-//                }
-//                if (amount.isGreaterThan(so.getAmount())) {
-//                    return DAResult.createWarning("Amount bigger than sell order amount.", "DAMarket.buy");
-//                }
-//                DAWareAmount wa = new DAWareAmount(so.getSellAmount().getWare(), amount);
-//                DAResult rf = targetStorage.canAddAmount(wa);
-//                if (!rf.isOK()) {
-//                    return DAResult.createFailed(rf.getMessage(), "DAMarket.buy");
-//                }
-//                DAClan buyer = targetStorage.getLeaser();
-//                if (buyer == null) {
-//                    return DAResult.createWarning("No valid buyer found in WorldNode.", "DAMarket.buy");
-//                }
-//                DAbmStorage sto = (DAbmStorage) ship.getModule(so.getStorageID());
-//                if (sto == null) {
-//                    return DAResult.createWarning("Order source storage not found in ship.", "DAMarket.buy");
-//                }
-//                DAClan owner = sto.getLeaser();
-//                if (owner == null) {
-//                    return DAResult.createWarning("No valid order owner found in WorldNode.", "DAMarket.buy");
-//                }
-//                DAOrder order = findSelling(so);
-//                if (order == null) {
-//                    return DAResult.createFailed("Could not find requested ware in selling ware.", "DAMarket.buy");
-//                }
-//                DAValue<Money> price = so.getPrice().scale(amount);
-//                DAMarketTransaction smt = DAMarketTransaction.createBill(owner, buyer, so.toString(), price);
-//                DAMarketTransaction bmt = DAMarketTransaction.createReceipt(owner, buyer, so.toString(), price);
-//                // Wares are not stored in an actual storage any more!
-//                // Instead the order holds the wares.
-////                if (! sto.remove(so.getSellAmount())) {
-////                    return DAResult.createFailed("Could not take requested ware from storage.", "DAMarket.buy");
-////                }
-//                DAResult r = owner.transaction(smt);
-//                if (! r.isOK()) {
-////                    DAResult r2 = sto.add(so.getSellAmount());
-////                    if (! r2.isOK()) {
-////                        DVCErrorHandler.raiseError(DAResult.createWarning("Container lost: " + so.getSellAmount()
-////                                , "DAMarket.buy"));
-////                    }
-//                    return r;
-//                }
-//                r = buyer.transaction(bmt);
-//                if (! r.isOK()) {
-////                    DAResult r2 = sto.add(so.getSellAmount());
-////                    if (! r2.isOK()) {
-////                        DVCErrorHandler.raiseError(DAResult.createWarning("Container lost(2): " + so.getSellAmount()
-////                                , "DAMarket.buy"));
-////                    }
-//                    owner.undoTransaction(smt);
-//                    return r;
-//                }
-//                DAResult<DAWareAmount> r2 = targetStorage.addAmount(wa);
-//                if (! r2.isOK()) {
-//                    order.remove(amount.sub(r2.getResult().getAmount()));
-//                    Log.warn(DAbmHangar.class, "buy: Can not add wares to storage: " + so.getSellAmount());
-//                    return r2;
-//                }
-//                // TODO
-////                buyer.addProperty(r2.getResult());
-////                owner.removeProperty(amount());
-//                order.remove(amount);
-//                if ((order.getAmount().is(DAValue.Sign.NEGATIVE_OR_ZERO)) && (! order.isRefilling())) {
-//                    orders.remove(order);
-//                }
-//                notifyListener(this);
-//                return DAResult.createOK("You bought " + amount + " of " + so.getWaresString() + ".", "DAMarket.buy");
-//            } catch (Exception e) {
-//                return DAResult.createFailed(e.toString(), "DAMarket.buy");
-//            }
-//        }
-//    }
-//
+                DAResult<DAWare> r = owner.transaction(smt);
+                if (! r.isOK()) {
+//                    DAResult r2 = sto.add(so.getSellAmount());
+//                    if (! r2.isOK()) {
+//                        DVCErrorHandler.raiseError(DAResult.createWarning("Container lost: " + so.getSellAmount()
+//                                , "DAMarket.buy"));
+//                    }
+                    return r;
+                }
+                r = buyer.transaction(bmt);
+                if (! r.isOK()) {
+//                    DAResult r2 = sto.add(so.getSellAmount());
+//                    if (! r2.isOK()) {
+//                        DVCErrorHandler.raiseError(DAResult.createWarning("Container lost(2): " + so.getSellAmount()
+//                                , "DAMarket.buy"));
+//                    }
+                    owner.undoTransaction(smt);
+                    return r;
+                }
+                final DAResult<DAWare> r2 = targetStorage.addAmount(wa);
+                if (! r2.isOK()) {
+                    order.remove(amount.sub(r2.getResult().getAmount()));
+                    Log.warn(DAMarket.class, "buy: Can not add wares to storage: " + so.ware.getAmount());
+                    return r2;
+                }
+                // TODO
+//                buyer.addProperty(r2.getResult());
+//                owner.removeProperty(amount());
+                order.remove(amount);
+                if ((! order.getAmount().isPositiv()) && (! order.isRefilling())) {
+                    orders.remove(order);
+                }
+                return DAResult.createOK("You bought " + amount + " of " + so.getWaresString() + ".", "DAMarket.buy");
+            } catch (Exception e) {
+                return DAResult.createFailed(e.toString(), "DAMarket.buy");
+            }
+        }
+    }
+
 //    /**
 //     * Processes a buy order.
 //     * @param sourceStorage
@@ -568,34 +462,7 @@ public class DAMarket extends DataAtom {
 //            }
 //        }
 //    }
-//
-////    //TODO: return the real warestree
-////    public DAWaresTree getTree() {
-////        DAWaresTree t = new DAWaresTree("");
-////        return t;
-////    }
-//
-////    @Override
-////    public DVCBasicDataModel clone() {
-////        DVCErrorHandler.raiseError(DAResult.createWarning("Not supported yet.", "DAMarket.parse"));
-////        throw new UnsupportedOperationException("Not supported yet.");
-////    }
-////
-////    @Override
-////    public DVCseMarket getEditor(EditMode editmode, DVCAbstractUser user) {
-////        DVCseMarket de = new DVCseMarket(this, editmode, user);
-////        addListener(de);
-////        return de;
-////    }
-////
-////    @Override
-////    public DVCrsmMarket getRemoteDataModel(DAOwningThread thread, IDVCActionDispatcher dispatcher) {
-////        DVCrsmMarket rc = new DVCrsmMarket(thread, this);
-////        rc.setActionDispatcher(dispatcher);
-////        addRemoteListener(rc);
-////        return rc;
-////    }
-//
+
 ////    @Override
 ////    public DATypedResult<DAParameterList> handle(DAOwningThread thread, DARemoteAction action, boolean sourceIsServer) {
 ////        if (action.getSender() != DARemoteAction.RemoteObject.MARKET) {
@@ -710,68 +577,51 @@ public class DAMarket extends DataAtom {
 ////        return new DATypedResult<DAParameterList>("ok",
 ////                DAResult.ResultType.OK, pl, "DVCosmClan.handle");
 ////    }
-////
-////    @Override
-////    public void addRemoteListener(IDVCRemoteDataModel rl) {
-////        if (remoteListener == null) {
-////            DVCErrorHandler.raiseError(DAResult.createWarning("remoteListener not initialized!", "DAMarket.addRemoteListener"));
-////            return;
-////        }
-////        remoteListener.add(rl);
-////    }
-////
-////    @Override
-////    public void removeRemoteListener(IDVCRemoteDataModel rl) {
-////        if (remoteListener == null) {
-////            DVCErrorHandler.raiseError(DAResult.createWarning("remoteListener not initialized!", "DAMarket.removeRemoteListener"));
-////            return;
-////        }
-////        remoteListener.remove(rl);
-////    }
-////
-////    @Override
-////    public void notifyRemoteListener(DAOwningThread newOwner) {
-////        if (remoteListener == null) {
-////            DVCErrorHandler.raiseError(DAResult.createWarning("remoteListener not initialized!", "DAMarket.notifyRemoteListener"));
-////            return;
-////        }
-////        for (IDVCRemoteDataModel rd : remoteListener) {
-////            rd.ownerChanged(newOwner);
-////        }
-////    }
-////
-////    @Override
-////    public void notifyRemoteListener(DVCBasicDataModel newData) {
-////        if (remoteListener == null) {
-////            DVCErrorHandler.raiseError(DAResult.createWarning("remoteListener not initialized!", "DAMarket.notifyRemoteListener"));
-////            return;
-////        }
-////        for (IDVCRemoteDataModel rd : remoteListener) {
-////            rd.dataChanged(newData);
-////        }
-////    }
-//
-//    public DAResult<de.dertroglodyt.iegcommon.module.DAbmWaresContainer> split(DAbmStorage sto, de.dertroglodyt.iegcommon.module.DAbmWaresContainer wc, DAValue<Pieces> a) {
-//        return sto.split(wc, a);
-//    }
 
     @Override
     public void toStream(DataOutputStream stream) throws IOException {
         stream.writeByte(VERSION);
+
+        id.toStream(stream);
+        marketName.toStream(stream);
+        tax.toStream(stream);
+        orders.toStream(stream);
     }
 
     /**
      * Init() needs to be called after deserialization.
      */
     @Override
-    public DAWare fromStream(DataInputStream stream) throws IOException {
+    public DAMarket fromStream(DataInputStream stream) throws IOException {
         final byte v = stream.readByte();
         if (v < 1) {
             throw new IllegalArgumentException("Invalid version number " + v);
         }
-        return null;
+        final DAUniqueID mid = new DAUniqueID().fromStream(stream);
+        final DAText mmarketName = new DAText().fromStream(stream);
+        final DAValue<Dimensionless> mtax = new DAValue().fromStream(stream);
+        final DAArray<DAOrder> morders = new DAArray<DAOrder>().fromStream(stream);
+        return new DAMarket(mid, mmarketName, mtax, morders);
     }
 
     private static final byte VERSION = 1;
+
+    private DAMarket(DAUniqueID id, DAText name, DAValue<Dimensionless> tax, DAArray<DAOrder> orders) {
+        super();
+        this.id = id;
+        this.marketName = name;
+        this.tax = tax;
+        this.orders = orders;
+        this.ship = null;
+    }
+
+    private DAMarket(DAShip parent, DAUniqueID id, DAText name, DAValue<Dimensionless> tax, DAArray<DAOrder> orders) {
+        super();
+        this.id = id;
+        this.marketName = name;
+        this.tax = tax;
+        this.orders = orders;
+        this.ship = parent;
+    }
 
 }
