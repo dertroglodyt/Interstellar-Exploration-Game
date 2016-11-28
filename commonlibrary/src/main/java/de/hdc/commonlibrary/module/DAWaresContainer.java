@@ -17,11 +17,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.measure.quantity.Volume;
+
+import de.hdc.commonlibrary.data.atom.DAArray;
+import de.hdc.commonlibrary.data.atom.DAText;
 import de.hdc.commonlibrary.data.atom.DAValue;
+import de.hdc.commonlibrary.data.compound.DAResult;
+import de.hdc.commonlibrary.data.quantity.NewUnits;
 import de.hdc.commonlibrary.data.quantity.Pieces;
+import de.hdc.commonlibrary.market.DAWare;
 import de.hdc.commonlibrary.market.DAWareClass;
 import de.hdc.commonlibrary.market.DAWareTypeTree;
+import de.hdc.commonlibrary.market.DAWareTypeTreeBootstrap;
 import de.hdc.commonlibrary.market.IDAWare;
+import de.hdc.commonlibrary.moduleclass.DABasicModuleClass;
+import de.hdc.commonlibrary.util.Log;
 
 /**
  *
@@ -74,27 +84,26 @@ public class DAWaresContainer extends DABasicModule {
     }
 
 
-//    public DAWaresContainer(IDAWare ware, int aAmount, DABasicModuleClass aContainerClass, DATransform trans) {
-//        super(aContainerClass, trans);
-//        if (ware.getWareClass().getSize().getMaxVolume().isGreaterThan(wareClass.getSize().getMaxVolume())) {
-//            DAResult.createFatal("Ware size <" + ware.getWareClass().getSize()
-//                    + "> does not match container size <" + wareClass.getSize()
-//                    + ">", "DABMWaresContainer()");
-//        }
-//        if (ware.getVolume().scale(aAmount).isGreaterThan(wareClass.getSize().getMaxVolume())) {
-//            DAResult.createFatal("Amount of ware <" + ware.getWareClass().getSize()
-//                    + "> does not match container size <" + wareClass.getSize()
-//                    + ">", "DABMWaresContainer()");
-//        }
-//        content = new DAWareAmount(ware, new DAValue<Pieces>(aAmount, NewUnits.PIECES));
-//        setName(new DALine("Conti"));
-//    }
+    public DAWaresContainer(IDAWare ware, int aAmount, DABasicModuleClass aContainerClass) {
+        super(aContainerClass, ModuleType.STORAGE, DAText.create("Conti"));
+        if (ware.getWareClass().size.getVolume().isGreaterThan(getWareClass().size.getVolume())) {
+            DAResult.createFatal("Ware size <" + ware.getWareClass().size
+                    + "> does not match container size <" + getWareClass().size
+                    + ">", "DABMWaresContainer()");
+        }
+        if (ware.getVolume().scale(aAmount).isGreaterThan(getWareClass().size.getVolume())) {
+            DAResult.createFatal("Amount of ware <" + ware.getWareClass().size
+                    + "> does not match container size <" + getWareClass().size
+                    + ">", "DABMWaresContainer()");
+        }
+        content = DAWare.create(ware, DAValue.create(aAmount, NewUnits.PIECES));
+    }
 
-//    @Override
-//    public String toString() {
-//        return content.getClassID() + " " + content
-//                + " (" + getActualAmount() + "/" + getMaxAmount() + ")";
-//    }
+    @Override
+    public String toString() {
+        return content.getClassID() + " " + content
+                + " (" + getActualAmount() + "/" + getMaxAmount() + ")";
+    }
 
 //    @Override
 //    public DAValue<Mass> getMass() {
@@ -116,92 +125,92 @@ public class DAWaresContainer extends DABasicModule {
 //        return DAResult.createOK("ok", "DABMWaresContainer.add");
 //    }
 
-    @Override
-    public boolean add(DAValue<Pieces> x) {
-        return content.add(x);
-    }
+//    @Override
+//    public boolean add(DAValue<Pieces> x) {
+//        return content.add(x);
+//    }
 
 //    public DAResult<?> sub(DAValue<Pieces> x) {
 //        if (!w.getWare().equals(content.getWare())) {
 //            return DAResult.createWarning("Wares do not match.", "DABMWaresContainer.add");
 //        }
-//        if (content.getAmount().isLessThan(w.getAmount())) {
+//        if (content.getAmount().isSmallerThan(w.getAmount())) {
 //            return DAResult.createWarning("Conatiner does not hold given amount!", "DABMWaresContainer.sub");
 //        }
 //        content = content.sub(w.getAmount());
 //        return DAResult.createOK("ok", "DABMWaresContainer.sub");
 //    }
 
-    @Override
-    public boolean sub(DAValue<Pieces> x) {
-        return content.sub(x);
-    }
-
-//    /**
-//     * Takes ware and packages it into containers.
-//     * Tries to use containers with minimum size required.
-//     * If that container size is to big for target storage the amount is split up into
-//     * smaller containers that fit into the target storage.
-//     * @param ware Ware to store in container
-//     * @param a Amount of ware
-//     * @param sto Target storage
-//     * @return The containers holding the packaged ware.
-//     */
-//    public static DAVector<DAWaresContainer> packageWare(IDAWare ware, DAValue<Pieces> a, DAbmStorage sto) {
-//        if (ware.isUnique() && (a.doubleValue(NewUnits.PIECES) != 1.0)) {
-//            Log.warn(DAWaresContainer.class, "Ware is unique! Can not stack.", "DABMWaresContainer.packageWare");
-//            return null;
-//        }
-//        DAWareClass.Size size = ware.getWareClass().getSize();
-//        DAValue<Volume> vol = size.getMaxVolume().scale(a.doubleValue(NewUnits.PIECES));
-//        // Maximum volume in storage
-//        DAValue<Volume> volSto = sto.getMaxSpace();
-//
-//        // find smallest container for ware size that still fits into target storage
-//        DABasicModuleClass cwc = (DABasicModuleClass) AssetPool.AssetNameWareClass.StandardContainerMini.getWareClass();
-//
-//        if (!cwc.getSize().isBiggerOrEqual(vol)) {
-//            DABasicModuleClass newcwc = (DABasicModuleClass) AssetPool.AssetNameWareClass.StandardContainerSmall.getWareClass();
-//            if (newcwc.getSize().getMaxVolume().isLessThan(volSto)
-//                     && newcwc.getSize().isSmaller(sto.getWareClass().getSize())) {
-//                cwc = newcwc;
-//            }
-//        }
-//        if (!cwc.getSize().isBiggerOrEqual(vol)) {
-//            DABasicModuleClass newcwc = (DABasicModuleClass) AssetPool.AssetNameWareClass.StandardContainerMedium.getWareClass();
-//            if (newcwc.getSize().getMaxVolume().isLessThan(volSto)
-//                     && newcwc.getSize().isSmaller(sto.getWareClass().getSize())) {
-//                cwc = newcwc;
-//            }
-//        }
-//        if (!cwc.getSize().isBiggerOrEqual(vol)) {
-//            DABasicModuleClass newcwc = (DABasicModuleClass) AssetPool.AssetNameWareClass.StandardContainerLarge.getWareClass();
-//            if (newcwc.getSize().getMaxVolume().isLessThan(volSto)
-//                     && newcwc.getSize().isSmaller(sto.getWareClass().getSize())) {
-//                cwc = newcwc;
-//            }
-//        }
-//        if (!cwc.getSize().isBiggerOrEqual(vol)) {
-//            DABasicModuleClass newcwc = (DABasicModuleClass) AssetPool.AssetNameWareClass.StandardContainerGiant.getWareClass();
-//            if (newcwc.getSize().getMaxVolume().isLessThan(volSto)
-//                     && newcwc.getSize().isSmaller(sto.getWareClass().getSize())) {
-//                cwc = newcwc;
-//            }
-//        }
-//        // fill n containers until full amount ist packed
-//        // max amount per container
-//
-//        int x = (int) Math.floor(cwc.getSize().getMaxVolume().doubleValueBase() / size.getMaxVolume().doubleValueBase());
-//        int remaining = (int) a.doubleValueBase();
-//        DAVector<DAWaresContainer> v = new DAVector<DAWaresContainer>(DAWaresContainer.class);
-//        while (remaining > 0) {
-//            int y = Math.min(x, remaining);
-//            DAWaresContainer cont = new DAWaresContainer(ware, y, cwc, null);
-//            remaining -= y;
-//            v.add(cont);
-//        }
-//        return v;
+//    @Override
+//    public boolean sub(DAValue<Pieces> x) {
+//        return content.sub(x);
 //    }
+
+    /**
+     * Takes ware and packages it into containers.
+     * Tries to use containers with minimum size required.
+     * If that container size is to big for target storage the amount is split up into
+     * smaller containers that fit into the target storage.
+     * @param ware Ware to store in container
+     * @param a Amount of ware
+     * @param sto Target storage
+     * @return The containers holding the packaged ware.
+     */
+    public static DAArray<DAWaresContainer> packageWare(IDAWare ware, DAValue<Pieces> a, DAStorage sto) {
+        if (ware.isUnique() && (a.doubleValue(NewUnits.PIECES) != 1.0)) {
+            Log.warn(DAWaresContainer.class, "Ware is unique! Can not stack.", "DABMWaresContainer.packageWare");
+            return null;
+        }
+        final DAWareClass.Size size = ware.getWareClass().size;
+        final DAValue<Volume> vol = size.getVolume().scale(a.doubleValue(NewUnits.PIECES));
+        // Maximum volume in storage
+        final DAValue<Volume> volSto = sto.getMaxCargoSpace();
+
+        // find smallest container for ware size that still fits into target storage
+        DABasicModuleClass cwc = DAWareTypeTreeBootstrap.CONTAINER_MINI;
+
+        if (!cwc.size.isBiggerOrEqual(vol)) {
+            DABasicModuleClass newcwc = DAWareTypeTreeBootstrap.CONTAINER_SMALL;
+            if (newcwc.size.getVolume().isSmallerThan(volSto)
+                     && newcwc.size.isSmaller(sto.getWareClass().size)) {
+                cwc = newcwc;
+            }
+        }
+        if (!cwc.size.isBiggerOrEqual(vol)) {
+            DABasicModuleClass newcwc = DAWareTypeTreeBootstrap.CONTAINER_MEDIUM;
+            if (newcwc.size.getVolume().isSmallerThan(volSto)
+                     && newcwc.size.isSmaller(sto.getWareClass().size)) {
+                cwc = newcwc;
+            }
+        }
+        if (!cwc.size.isBiggerOrEqual(vol)) {
+            DABasicModuleClass newcwc = DAWareTypeTreeBootstrap.CONTAINER_LARGE;
+            if (newcwc.size.getVolume().isSmallerThan(volSto)
+                     && newcwc.size.isSmaller(sto.getWareClass().size)) {
+                cwc = newcwc;
+            }
+        }
+        if (!cwc.size.isBiggerOrEqual(vol)) {
+            DABasicModuleClass newcwc = DAWareTypeTreeBootstrap.CONTAINER_GIANT;
+            if (newcwc.size.getVolume().isSmallerThan(volSto)
+                     && newcwc.size.isSmaller(sto.getWareClass().size)) {
+                cwc = newcwc;
+            }
+        }
+        // fill n containers until full amount ist packed
+        // max amount per container
+
+        int x = (int) Math.floor(cwc.size.getVolume().doubleValueBase() / size.getVolume().doubleValueBase());
+        int remaining = (int) a.doubleValueBase();
+        DAArray<DAWaresContainer> v = new DAArray<DAWaresContainer>();
+        while (remaining > 0) {
+            int y = Math.min(x, remaining);
+            final DAWaresContainer cont = new DAWaresContainer(ware, y, cwc);
+            remaining -= y;
+            v.add(cont);
+        }
+        return v;
+    }
 
 //    @Override
 //    public void resolveOther(DAModuleContainer aParentContainer) {
@@ -233,12 +242,12 @@ public class DAWaresContainer extends DABasicModule {
         return content.getAmount();
     }
 
-//    public DAValue<Pieces> getMaxAmount() {
-//        DAValue<Volume> volC = wareClass.getSize().getMaxVolume();
-//        DAValue<Volume> volW = getContentType().getSize().getMaxVolume();
-//        int x = (int) (volC.doubleValueBase() / volW.doubleValueBase());
-//        return new DAValue<Pieces>(x, NewUnits.PIECES);
-//    }
+    public DAValue<Pieces> getMaxAmount() {
+        DAValue<Volume> volC = getWareClass().size.getVolume();
+        DAValue<Volume> volW = getContentType().size.getVolume();
+        int x = (int) (volC.doubleValueBase() / volW.doubleValueBase());
+        return DAValue.create(x, NewUnits.PIECES);
+    }
 
 //    public DAValue<Pieces> getFreeAmount() {
 //        return getMaxAmount().sub(getActualAmount());

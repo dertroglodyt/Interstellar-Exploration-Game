@@ -11,36 +11,27 @@
 
 package de.hdc.commonlibrary.module;
 
+import android.support.annotation.NonNull;
+
 import org.jscience.economics.money.Money;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 
 import javax.measure.quantity.Duration;
-import javax.measure.quantity.Mass;
 import javax.measure.unit.NonSI;
 
-import de.dertroglodyt.common.data.SerialUID;
-import de.dertroglodyt.common.data.quantity.NewUnits;
-import de.dertroglodyt.common.data.quantity.Pieces;
-import de.dertroglodyt.common.data.types.atom.DADateTime;
-import de.dertroglodyt.common.data.types.atom.DALogItem;
-import de.dertroglodyt.common.data.types.atom.DAUniqueID;
-import de.dertroglodyt.common.data.types.atom.DAValue;
-import de.dertroglodyt.common.data.types.collection.DAIDMap;
-import de.dertroglodyt.common.data.types.collection.DAVector;
-import de.dertroglodyt.common.util.Log;
-import de.dertroglodyt.iegcommon.core.AssetPool;
-import de.dertroglodyt.iegcommon.core.DAClan;
-import de.dertroglodyt.iegcommon.market.DAMarketTransaction;
-import de.dertroglodyt.iegcommon.moduleclass.DABasicModuleClass;
-import de.dertroglodyt.iegcommon.moduleclass.DARentableStorageClass;
-import de.dertroglodyt.iegcommon.moduleclass.DAStorageClass;
-import de.dertroglodyt.iegcommon.physic.DATransform;
+import de.hdc.commonlibrary.data.atom.DAArray;
+import de.hdc.commonlibrary.data.atom.DADateTime;
+import de.hdc.commonlibrary.data.atom.DALogItem;
+import de.hdc.commonlibrary.data.atom.DAText;
 import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DAValue;
-import de.hdc.commonlibrary.module.DABasicModule;
+import de.hdc.commonlibrary.data.compound.DAMap;
+import de.hdc.commonlibrary.data.quantity.NewUnits;
+import de.hdc.commonlibrary.market.DAWareTypeTree;
+import de.hdc.commonlibrary.moduleclass.DABasicModuleClass;
 
 /**
  * Mammut module containing a large number of storages that can be leased.
@@ -49,14 +40,14 @@ import de.hdc.commonlibrary.module.DABasicModule;
 @SuppressWarnings("serial")
 public class DARentableStorage extends DABasicModule {
 
-    private static final DAValue<Duration> CASHIN_PERIOD = new DAValue<Duration>(1, NonSI.DAY);
+    private static final DAValue<Duration> CASHIN_PERIOD = DAValue.create(1, NonSI.DAY);
 
     /**
      * List of cargo storages.
      * Key is UserID (ClanID).
      * DAIDMap<DALogItem<DAStorage>>
      */
-    private DAIDMap<DALogItem<DAStorage>> leasedStorages;
+    private DAMap<DAUniqueID, DALogItem<DAStorage>> leasedStorages;
     /**
      * Price per m² and minute.
      */
@@ -64,48 +55,22 @@ public class DARentableStorage extends DABasicModule {
 
     private transient DADateTime lastCashed;
 
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        super.readExternal(in);
-        byte version = in.readByte();
-        // Do something different here if old version demands it
-
-        leasedStorages.readExternal(in);
-        pricePerMin.readExternal(in);
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        super.writeExternal(out);
-        /**
-         * The version number of the class to help distinguish changed read/write data formats.
-         * It should be set in every "writeExternal" of every class.
-         * It's value should only change if write-/readExternal are changed.
-         */
-        byte version = 1;
-        out.writeByte(version);
-
-        leasedStorages.writeExternal(out);
-        pricePerMin.writeExternal(out);
-    }
-
     @Deprecated
     public DARentableStorage() {
         super();
-        leasedStorages = new DAIDMap<DALogItem<DAStorage>>(DALogItem.class);
-        pricePerMin = new DAValue<Money>(0, NewUnits.CREDITS);
+        leasedStorages = DAMap.create();
+        pricePerMin = DAValue.create(0, NewUnits.CREDITS);
     }
 
-    public DARentableStorage(DABasicModuleClass aWareClass) {
-        super(aWareClass, null);
-        leasedStorages = new DAIDMap<DALogItem<DAStorage>>(DALogItem.class);
-        pricePerMin = new DAValue<Money>(0, NewUnits.CREDITS);
+    public DARentableStorage(DABasicModuleClass aWareClass, DAText name) {
+        super(aWareClass, ModuleType.RENTABLE_STORAGE, name);
+        leasedStorages = DAMap.create();
+        pricePerMin = DAValue.create(0, NewUnits.CREDITS);
     }
 
-    public DARentableStorage(DABasicModuleClass aWareClass, DATransform trans) {
-        super(aWareClass, trans);
-        leasedStorages = new DAIDMap<DALogItem<DAStorage>>(DALogItem.class);
-        pricePerMin = new DAValue<Money>(0, NewUnits.CREDITS);
+    @Override
+    public void init(DAWareTypeTree tree) {
+
     }
 
 //    @Override
@@ -117,20 +82,20 @@ public class DARentableStorage extends DABasicModule {
 //        }
 //    }
 
-    @Override
-    public DAValue<Mass> getMass() {
-        DAValue<Mass> m = super.getTotalMass();
-        for (DALogItem<DAStorage> li : leasedStorages.values()) {
-            DALogItem<DAStorage> c = li;
-            m = m.add(c.getData().getTotalMass());
-        }
-        return m;
-    }
+//    @Override
+//    public DAValue<Mass> getMass() {
+//        DAValue<Mass> m = super.getTotalMass();
+//        for (DALogItem<DAStorage> li : leasedStorages.values()) {
+//            DALogItem<DAStorage> c = li;
+//            m = m.add(c.getData().getTotalMass());
+//        }
+//        return m;
+//    }
 
-    @Override
-    public DAValue<Mass> getTotalMass() {
-        return getMass();
-    }
+//    @Override
+//    public DAValue<Mass> getTotalMass() {
+//        return getMass();
+//    }
 
 //    @Override
 //    public double getMassKG() {
@@ -146,24 +111,24 @@ public class DARentableStorage extends DABasicModule {
         return pricePerMin;
     }
 
-    public DAValue<Pieces> getMaxStorageCount() {
-        return getWareClass().getMaxStorages();
-    }
+//    public DAValue<Pieces> getMaxStorageCount() {
+//        return getWareClass().getMaxStorages();
+//    }
+//
+//    public DAUniqueID getStorageClassID() {
+//        return getWareClass().getStorageClassID();
+//    }
 
-    public DAUniqueID getStorageClassID() {
-        return getWareClass().getStorageClassID();
-    }
-
-    public DAValue<Pieces> getFreeStorageCount() {
-        return new DAValue<Pieces>(getMaxStorageCount().doubleValueBase() - leasedStorages.count(), NewUnits.PIECES);
-    }
-
-    public DAValue<Pieces> getUsedStorageCount() {
-        return new DAValue<Pieces>(leasedStorages.count(), NewUnits.PIECES);
-    }
+//    public DAValue<Pieces> getFreeStorageCount() {
+//        return new DAValue<Pieces>(getMaxStorageCount().doubleValueBase() - leasedStorages.size(), NewUnits.PIECES);
+//    }
+//
+//    public DAValue<Pieces> getUsedStorageCount() {
+//        return new DAValue<Pieces>(leasedStorages.size(), NewUnits.PIECES);
+//    }
 
     public DAStorage getStorageByLeaser(DAUniqueID leaserID) {
-        DALogItem<DAStorage> li = leasedStorages.getValue(leaserID);
+        DALogItem<DAStorage> li = leasedStorages.get(leaserID);
         if (li != null) {
             return li.getData();
         } else {
@@ -172,7 +137,7 @@ public class DARentableStorage extends DABasicModule {
     }
 
     public DAStorage getStorageByModuleID(DAUniqueID moduleID) {
-        for (DALogItem<DAStorage> li : leasedStorages.values()) {
+        for (DALogItem<DAStorage> li : leasedStorages.getValueList()) {
             DAStorage s = li.getData();
             if (s.getItemID().equals(moduleID)) {
                 return s;
@@ -181,48 +146,48 @@ public class DARentableStorage extends DABasicModule {
         return null;
     }
 
-    public DAStorage rentStorage(DAClan leaser) {
-        DAStorage sto = getStorageByLeaser(leaser.getUserID());
-        if (sto != null) {
-            return sto;
-        }
-        DAStorageClass wc = null;
-        try {
-            wc = (DAStorageClass) AssetPool.waresTree.getWareClass(getStorageClassID());
-            if (wc == null) {
-                Log.warn(de.dertroglodyt.iegcommon.module.DARentableStorage.class, "rentStorage: Ware class with id <" + getStorageClassID()
-                        + "> not found in WaresTree for rentable storage <" + this.toParseString("") + ">.");
-                return null;
-            }
-        } catch(ClassCastException cce) {
-            Log.warn(de.dertroglodyt.iegcommon.module.DARentableStorage.class, "rentStorage: Invalid storage class <" + getStorageClassID()
-                    + "> for RentableStorage. " + cce.toString());
-            return null;
-        }
-        sto = wc.getInstance();
-        sto.setLeaserID(leaser.getUserID());
-        sto.setOnline(true);
-        sto.setName(leaser.getFamilyName());
-        leasedStorages.addProperty(leaser.getUserID(), new DALogItem<DAStorage>(sto));
-        return sto;
-    }
+//    public DAStorage rentStorage(DAClan leaser) {
+//        DAStorage sto = getStorageByLeaser(leaser.getUserID());
+//        if (sto != null) {
+//            return sto;
+//        }
+//        DAStorageClass wc = null;
+//        try {
+//            wc = (DAStorageClass) AssetPool.waresTree.getWareClass(getStorageClassID());
+//            if (wc == null) {
+//                Log.warn(de.dertroglodyt.iegcommon.module.DARentableStorage.class, "rentStorage: Ware class with id <" + getStorageClassID()
+//                        + "> not found in WaresTree for rentable storage <" + this.toParseString("") + ">.");
+//                return null;
+//            }
+//        } catch(ClassCastException cce) {
+//            Log.warn(de.dertroglodyt.iegcommon.module.DARentableStorage.class, "rentStorage: Invalid storage class <" + getStorageClassID()
+//                    + "> for RentableStorage. " + cce.toString());
+//            return null;
+//        }
+//        sto = wc.getInstance();
+//        sto.setLeaserID(leaser.getUserID());
+//        sto.setOnline(true);
+//        sto.setName(leaser.getFamilyName());
+//        leasedStorages.addProperty(leaser.getUserID(), new DALogItem<DAStorage>(sto));
+//        return sto;
+//    }
 
-    public void removeStorage(DAStorage sto) {
-        for (DALogItem<DAStorage> li : leasedStorages.values()) {
-            if (li.getData().equals(sto)) {
-                leasedStorages.removeByValue(li);
-                return;
-            }
-        }
-    }
+//    public void removeStorage(DAStorage sto) {
+//        for (DALogItem<DAStorage> li : leasedStorages.getValueList()) {
+//            if (li.getData().equals(sto)) {
+//                leasedStorages.removeByValue(li);
+//                return;
+//            }
+//        }
+//    }
 
-    public DAIDMap<DALogItem<DAStorage>> getList() {
-        return leasedStorages;
-    }
+//    public DAIDMap<DALogItem<DAStorage>> getList() {
+//        return leasedStorages;
+//    }
 
-    public DAVector<DAStorage> getStorageList() {
-        DAVector<DAStorage> v = new DAVector<DAStorage>(DAStorage.class);
-        for (DALogItem<DAStorage> li : leasedStorages.values()) {
+    public DAArray<DAStorage> getStorageList() {
+        DAArray<DAStorage> v = new DAArray();
+        for (DALogItem<DAStorage> li : leasedStorages.getValueList()) {
             v.add(li.getData());
         }
         return v;
@@ -238,83 +203,96 @@ public class DARentableStorage extends DABasicModule {
 ////        throw new UnsupportedOperationException("Not supported yet.");
 //    }
 
-    @Deprecated
-    @Override
-    public DARentableStorageClass getWareClass() {
-        return (DARentableStorageClass) wareClass;
-    }
+//    @Deprecated
+//    @Override
+//    public DARentableStorageClass getWareClass() {
+//        return (DARentableStorageClass) wareClass;
+//    }
 
     public DADateTime getLastCashed(DAUniqueID leaserID) {
-        return leasedStorages.getValue(leaserID).getTime();
+        return leasedStorages.get(leaserID).getTime();
     }
 
     protected void resetLastCashed(DAUniqueID leaserID) {
-        DALogItem<DAStorage> item = leasedStorages.getValue(leaserID);
+        DALogItem<DAStorage> item = leasedStorages.get(leaserID);
         item.resetTime();
     }
 
-    protected void cashIn(DAUniqueID leaserID) {
-        if (getParentContainer() == null) {
-            return;
-        }
-        DALogItem<DAStorage> li = leasedStorages.getValue(leaserID);
-        DAClan c = li.getData().getLeaser();
-        if (c == null) {
-            Log.warn(de.dertroglodyt.iegcommon.module.DARentableStorage.class, "cashIn: Leasing clan not found!");
-            return;
-        }
-        DADateTime dt = getLastCashed(leaserID);
-        DAValue<Duration> diff = dt.getDiff(new DADateTime());
-        DAValue<Money> m = new DAValue<Money>(diff.to(NonSI.MINUTE).scale(pricePerMin.doubleValueBase()).doubleValueBase()
-                , NewUnits.CREDITS);
-        DAMarketTransaction mt = DAMarketTransaction.createTaxBill(getRootContainer().getOwningClan(), c
-                , "Lagerraumgebühr für " + c.toString(), m);
-        c.transaction(mt);
-        mt = DAMarketTransaction.createTaxReceipt(getRootContainer().getOwningClan(), c
-                , "Lagerraumgebühr für " + c.toString(), m);
-        getRootContainer().getOwningClan().transaction(mt);
-        resetLastCashed(c.getUserID());
-    }
+//    protected void cashIn(DAUniqueID leaserID) {
+//        if (getParentContainer() == null) {
+//            return;
+//        }
+//        DALogItem<DAStorage> li = leasedStorages.getValue(leaserID);
+//        DAClan c = li.getData().getLeaser();
+//        if (c == null) {
+//            Log.warn(de.dertroglodyt.iegcommon.module.DARentableStorage.class, "cashIn: Leasing clan not found!");
+//            return;
+//        }
+//        DADateTime dt = getLastCashed(leaserID);
+//        DAValue<Duration> diff = dt.getDiff(new DADateTime());
+//        DAValue<Money> m = new DAValue<Money>(diff.to(NonSI.MINUTE).scale(pricePerMin.doubleValueBase()).doubleValueBase()
+//                , NewUnits.CREDITS);
+//        DAMarketTransaction mt = DAMarketTransaction.createTaxBill(getRootContainer().getOwningClan(), c
+//                , "Lagerraumgebühr für " + c.toString(), m);
+//        c.transaction(mt);
+//        mt = DAMarketTransaction.createTaxReceipt(getRootContainer().getOwningClan(), c
+//                , "Lagerraumgebühr für " + c.toString(), m);
+//        getRootContainer().getOwningClan().transaction(mt);
+//        resetLastCashed(c.getUserID());
+//    }
+//
+//    protected void cashAllIn() {
+//        if (getParentContainer() == null) {
+//            return;
+//        }
+//        for (DAUniqueID id : leasedStorages.getKeySet()) {
+//            cashIn(id);
+//        }
+//    }
 
-    protected void cashAllIn() {
-        if (getParentContainer() == null) {
-            return;
-        }
-        for (DAUniqueID id : leasedStorages.getKeySet()) {
-            cashIn(id);
-        }
+//    @Override
+//    public void longTick(DADateTime actWorldTime, DAValue<Duration> t) {
+//        super.longTick(actWorldTime, t);
+//        for (DALogItem<DAStorage> li : leasedStorages.values()) {
+//            li.getData().longTick(actWorldTime, t);
+//        }
+//        if (! isOnline()) {
+//            return;
+//        }
+//        if (lastCashed == null) {
+//            lastCashed = actWorldTime;
+//        }
+//        if (actWorldTime.compareTo(lastCashed) >= 0) {
+//            lastCashed = actWorldTime;
+//            lastCashed.addDuration(CASHIN_PERIOD, null);
+//            cashAllIn();
+//        }
+//    }
+
+    @Override
+    public void toStream(@NonNull final DataOutputStream stream) throws IOException {
+        stream.writeByte(VERSION);
+        leasedStorages.toStream(stream);
+        pricePerMin.toStream(stream);
     }
 
     @Override
-    public void longTick(DADateTime actWorldTime, DAValue<Duration> t) {
-        super.longTick(actWorldTime, t);
-        for (DALogItem<DAStorage> li : leasedStorages.values()) {
-            li.getData().longTick(actWorldTime, t);
+    public DARentableStorage fromStream(final DataInputStream stream) throws IOException {
+        final byte v = stream.readByte();
+        if (v < 1) {
+            throw new IllegalArgumentException("Invalid version number " + v);
         }
-        if (! isOnline()) {
-            return;
-        }
-        if (lastCashed == null) {
-            lastCashed = actWorldTime;
-        }
-        if (actWorldTime.compareTo(lastCashed) >= 0) {
-            lastCashed = actWorldTime;
-            lastCashed.addDuration(CASHIN_PERIOD, null);
-            cashAllIn();
-        }
+        DAMap stor = new DAMap().fromStream(stream);
+        DAValue price = new DAValue().fromStream(stream);
+        return new DARentableStorage(stor, price);
     }
 
-//    @Override
-//    public DVCseBMRentableStorage getEditor(EditMode editmode, DVCAbstractUser user) {
-//        DVCseBMRentableStorage de = new DVCseBMRentableStorage(this, editmode, user);
-//        addListener(de);
-//        return de;
-//    }
-//
-//    public static DVCseBasicModule getParentEditor(DARentableStorage model, EditMode editmode, DVCAbstractUser user) {
-//        DVCseBasicModule de = new DVCseBasicModule(model, editmode, user);
-//        model.addListener(de);
-//        return de;
-//    }
+    private static final byte VERSION = 1;
+
+    private DARentableStorage(DAMap<DAUniqueID, DALogItem<DAStorage>> storages, DAValue<Money> price) {
+        super();
+        this.leasedStorages = storages;
+        this.pricePerMin = price;
+    }
 
 }

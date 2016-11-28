@@ -17,16 +17,23 @@ import java.io.IOException;
 
 import javax.measure.quantity.Duration;
 import javax.measure.quantity.Energy;
+import javax.measure.quantity.Mass;
+import javax.measure.quantity.Volume;
 import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
 
 import de.hdc.commonlibrary.data.atom.DABoolean;
+import de.hdc.commonlibrary.data.atom.DAText;
 import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DAValue;
+import de.hdc.commonlibrary.data.quantity.Pieces;
 import de.hdc.commonlibrary.market.DAPatentSet;
 import de.hdc.commonlibrary.market.DAWareClass;
 import de.hdc.commonlibrary.module.DADamage;
 import de.hdc.commonlibrary.module.DAGoodFlow;
 import de.hdc.commonlibrary.module.DAGoodFlowList;
+
+import static de.hdc.commonlibrary.market.DAWareTypeTreeBootstrap.ELECTRICAL_POWER;
 
 /**
  *
@@ -63,6 +70,14 @@ public class DABasicModuleClass extends DAWareClass {
      */
     public final DAPatentSet prerequisites;
 
+    public static DABasicModuleClass create(DAUniqueID id, DAUniqueID typeID, DAText name, DAText description
+            , Size size, State state, Unit<?> unit, DAValue<Mass> mass, DAValue<Volume> volume, DAText assetName
+            , DAGoodFlowList goodFlow, DAValue<Energy> maxHitPoints, DADamage resistance
+            , DAValue<Duration> onlineDelay, DABoolean offLineOnOverflow, DAPatentSet prerequisites) {
+        return new DABasicModuleClass(id, typeID, name, description, size, state, unit, mass, volume, assetName
+                , goodFlow, maxHitPoints, resistance, onlineDelay, offLineOnOverflow, prerequisites);
+    }
+
     @Deprecated
     public DABasicModuleClass() {
         super();
@@ -83,7 +98,7 @@ public class DABasicModuleClass extends DAWareClass {
     }
 
     public DAValue<Energy> getOnlinePower() {
-        DAValue<Energy> f = (DAValue<Energy>) getGoodFlow(DAWareClass.ELECTRICAL_POWER).flow;
+        DAValue<Energy> f = (DAValue<Energy>) getGoodFlow(ELECTRICAL_POWER).flow;
         if (f == null) {
             f = DAValue.<Energy>create(0, SI.JOULE);
         }
@@ -105,7 +120,7 @@ public class DABasicModuleClass extends DAWareClass {
 
     @Override
     public DABasicModuleClass fromStream(DataInputStream stream) throws IOException {
-        super.fromStream(stream);
+        DAWareClass wc = super.fromStream(stream);
         final byte v = stream.readByte();
         if (v < 1) {
             throw new IllegalArgumentException("Invalid version number " + v);
@@ -118,14 +133,29 @@ public class DABasicModuleClass extends DAWareClass {
         final DABoolean offLineOnOverflow = new DABoolean().fromStream(stream);
         final DAPatentSet prerequisites = new DAPatentSet().fromStream(stream);
 
-        return new DABasicModuleClass(goodFlow, maxHitPoints, resistance, onlineDelay, offLineOnOverflow, prerequisites);
+        return new DABasicModuleClass(wc, goodFlow, maxHitPoints, resistance, onlineDelay
+                , offLineOnOverflow, prerequisites);
     }
 
     private static final byte VERSION = 1;
 
-    private DABasicModuleClass(DAGoodFlowList goodFlow, DAValue<Energy> maxHitPoints, DADamage resistance
+    private DABasicModuleClass(DAWareClass wc, DAGoodFlowList goodFlow, DAValue<Energy> maxHitPoints
+            , DADamage resistance, DAValue<Duration> onlineDelay, DABoolean offLineOnOverflow
+            , DAPatentSet prerequisites) {
+        super(wc);
+        this.goodFlow = goodFlow;
+        this.maxHitPoints = maxHitPoints;
+        this.resistance = resistance;
+        this.onlineDelay = onlineDelay;
+        this.offLineOnOverflow = offLineOnOverflow;
+        this.prerequisites = prerequisites;
+    }
+
+    private DABasicModuleClass(DAUniqueID id, DAUniqueID typeID, DAText name, DAText description
+            , Size size, State state, Unit<?> unit, DAValue<Mass> mass, DAValue<Volume> volume, DAText assetName
+            , DAGoodFlowList goodFlow, DAValue<Energy> maxHitPoints, DADamage resistance
             , DAValue<Duration> onlineDelay, DABoolean offLineOnOverflow, DAPatentSet prerequisites) {
-        super();
+        super(id, typeID, name, description, size, state, Pieces.UNIT, mass, volume, assetName);
         this.goodFlow = goodFlow;
         this.maxHitPoints = maxHitPoints;
         this.resistance = resistance;

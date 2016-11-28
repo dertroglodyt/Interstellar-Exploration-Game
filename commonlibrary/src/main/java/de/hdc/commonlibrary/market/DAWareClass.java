@@ -34,33 +34,26 @@ import de.hdc.commonlibrary.data.quantity.Pieces;
  */
 public class DAWareClass extends DataAtom {
 
-    public static final DAWareClass ELECTRICAL_POWER = new DAWareClass(
-            DAUniqueID.parse("00000000000000000000000000000001")
-            , DAUniqueID.parse("00000000000000000000000000000001")
-            , DAText.create("Electrical Power"), DAText.create("Needs description"), Size.NONE
-            , State.PUBLIC, SI.JOULE, DAValue.<Mass>create(0, SI.KILOGRAM), DAValue.<Volume>create(0, SI.CUBIC_METRE)
-            , DAText.create("Electrical Power"));
-
     public static enum Size {
-        NONE("unbekannt", 0),          // Max. Seitenlänge
-        MINI("mini", 0.008),           // 0.20m
-        SMALL("klein", 1.0),           // 1.0m
-        MEDIUM("mittel", 125.0),       // 5.0m
-        LARGE("groß", 8000.0),         // 20.0m
-        GIANT("riesig", 125000.0),     // 50.0m
-        COLOSSAL("kolossal", 1e100),   // everything else. can not be carried / stored by normal means.
+        NONE("unbekannt", 0, 0),          // Max. Seitenlänge
+        MINI("mini", 0.008, 0.2),           // 0.20m
+        SMALL("klein", 1.0, 1.0),           // 1.0m
+        MEDIUM("mittel", 125.0, 5.0),       // 5.0m
+        LARGE("groß", 8000.0, 20.0),         // 20.0m
+        GIANT("riesig", 125000.0, 50.0),     // 50.0m
+        COLOSSAL("kolossal", 1e99, 1e33),   // everything else. can not be carried / stored by normal means.
         ;
 
         public final DAText text;
-        public final DAValue<Volume> vol;
+        public final DAValue<Volume> volume;
         public final DAValue<Mass> mass;
         public final DAValue<Length> maxSide;
 
-        Size(String aText, double m3) {
+        Size(String aText, double m3, double m) {
             text = DAText.create(aText);
-            vol = DAValue.<Volume>create(m3, SI.CUBIC_METRE);
-            mass = DAValue.<Mass>create(m3 * 200, SI.KILOGRAM);  // 200kg / m³  Hull-Only-Weight
-            maxSide = DAValue.<Length>create(Math.cbrt(m3), SI.METER);
+            volume = DAValue.create(m3, SI.CUBIC_METRE);
+            mass = DAValue.create(m3 * 200, SI.KILOGRAM);  // 200kg / m³  Hull-Only-Weight
+            maxSide = DAValue.create(m3, SI.METER);
         }
 
         public String toSerialString() {
@@ -86,8 +79,12 @@ public class DAWareClass extends DataAtom {
             return maxSide;
         }
 
+        public DAValue<Volume> getVolume() {
+            return volume;
+        }
+
         public boolean isSmaller(Size s) {
-            return vol.isSmallerThan(s.vol);
+            return volume.isSmallerThan(s.volume);
         }
 
         public boolean isBiggerOrEqual(Size s) {
@@ -95,7 +92,7 @@ public class DAWareClass extends DataAtom {
         }
 
         public boolean isBiggerOrEqual(DAValue<Volume> v) {
-            return ! vol.isSmallerThan(v);
+            return ! volume.isSmallerThan(v);
         }
     }
     public static enum State {
@@ -139,7 +136,7 @@ public class DAWareClass extends DataAtom {
     @Deprecated
     public static DAWareClass create(DAUniqueID id, DAUniqueID typeID, DAText name) {
         return new DAWareClass(id, typeID, name, DAText.create(""), Size.NONE, State.ADMIN, Pieces.UNIT
-                , DAValue.<Mass>create(1, SI.KILOGRAM), DAValue.<Volume>create(1, SI.CUBIC_METRE), DAText.create(""));
+                , DAValue.create(1, SI.KILOGRAM), DAValue.create(1, SI.CUBIC_METRE), DAText.create(""));
     }
 
     @Deprecated
@@ -206,7 +203,27 @@ public class DAWareClass extends DataAtom {
 
     private static final byte VERSION = 1;
 
-    private DAWareClass(DAUniqueID id, DAUniqueID typeID, DAText name, DAText description, Size size, State state
+    protected DAWareClass(DAWareClass wc) {
+        super();
+        this.id = wc.id;
+        this.typeID = wc.typeID;
+        this.name = wc.name;
+        this.description = wc.description;
+        this.size = wc.size;
+        this.state = wc.state;
+        this.unit = wc.unit;
+        this.mass = wc.mass;
+        this.volume = wc.volume;
+        this.assetName = wc.assetName;
+        if (! volume.isZero()) {
+            final DAValue<VolumetricDensity> d = (DAValue<VolumetricDensity>) mass.div(volume);
+            kgPerM3 = d.to(VolumetricDensity.UNIT);
+        } else {
+            kgPerM3 = DAValue.create(0.0, VolumetricDensity.UNIT);
+        }
+    }
+
+    protected DAWareClass(DAUniqueID id, DAUniqueID typeID, DAText name, DAText description, Size size, State state
             , Unit<?> unit, DAValue<Mass> mass, DAValue<Volume> volume, DAText assetName) {
         super();
         this.id = id;

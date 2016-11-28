@@ -12,6 +12,9 @@
 
 package de.hdc.commonlibrary.data.compound;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -27,9 +30,14 @@ import de.hdc.commonlibrary.data.atom.DataAtom;
  * @author Martin
  */
 //@SuppressWarnings("serial")
-public abstract class DAMap<Q extends IDataAtom, T extends IDataAtom> extends DataAtom {
+public class DAMap<Q extends IDataAtom, T extends IDataAtom> extends DataAtom {
 
-    protected DAMap() {
+    public static DAMap create() {
+        return new DAMap();
+    }
+
+    @Deprecated
+    public DAMap() {
         super();
         table = new ConcurrentSkipListMap<>();
     }
@@ -96,30 +104,47 @@ public abstract class DAMap<Q extends IDataAtom, T extends IDataAtom> extends Da
         return 0;
 }
 
-//    @Override
-//    public void toStream(DataOutputStream stream) throws IOException {
-//        stream.writeByte(VERSION);
-//        stream.writeInt(table.size());
-//        for (Map.Entry<Q, T> entry : table.entrySet()) {
-//            entry.getKey().toStream(stream);
-//            entry.getValue().toStream(stream);
-//        }
-//    }
+    @Override
+    public void toStream(DataOutputStream stream) throws IOException {
+        stream.writeByte(VERSION);
+        stream.writeInt(table.size());
+        if (table.size() > 0) {
+            stream.writeUTF(table.firstEntry().getKey().getClass().getName());
+            stream.writeUTF(table.firstEntry().getValue().getClass().getName());
+        }
+        for (Map.Entry<Q, T> entry : table.entrySet()) {
+            entry.getKey().toStream(stream);
+            entry.getValue().toStream(stream);
+        }
+    }
 
-//    public static DATextList<Q, T> fromStream(DataInputStream stream) throws IOException {
-//        final byte v = stream.readByte(); // version
-//        if (v < 1) {
-//            throw new IllegalArgumentException("Invalid version number " + v);
-//        }
-//        final DAMap<?, ?> t = new DAMap();
-//        final int x = stream.readInt();
-//        for (int i = 0; i < x; i++) {
-//            final Q key = Q.fromStream(stream);
-//            final T a = T.fromStream(stream);
-//            t.setValue(key, a);
-//        }
-//        return t;
-//    }
+    @Override
+    public DAMap<Q, T> fromStream(DataInputStream stream) throws IOException {
+        final byte v = stream.readByte(); // version
+        if (v < 1) {
+            throw new IllegalArgumentException("Invalid version number " + v);
+        }
+        final DAMap<Q, T> t = new DAMap();
+        final int x = stream.readInt();
+        Class ck = null;
+        Class cv = null;
+        try {
+            if (x > 0) {
+                ck = Class.forName(stream.readUTF());
+                cv = Class.forName(stream.readUTF());
+            }
+            for (int i = 0; i < x; i++) {
+                final Q key;
+                    key = (Q) ((IDataAtom) ck.newInstance()).fromStream(stream);
+                final T a = (T) ((IDataAtom) cv.newInstance()).fromStream(stream);
+                t.set(key, a);
+            }
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            e.printStackTrace();
+            throw new IOException(e.toString());
+        }
+        return t;
+    }
 
     protected final ConcurrentSkipListMap<Q, T> table;
 

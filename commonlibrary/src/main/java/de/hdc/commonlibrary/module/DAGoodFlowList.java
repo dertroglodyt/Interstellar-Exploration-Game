@@ -1,4 +1,10 @@
 /*
+ *  Created by DerTroglodyt on 2016-11-28 16:52
+ *  Email dertroglodyt@gmail.com
+ *  Copyright by HDC, Germany
+ */
+
+/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -10,6 +16,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
+
+import javax.measure.unit.Unit;
 
 import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DAValue;
@@ -32,6 +40,16 @@ public class DAGoodFlowList extends DataAtom {
         return new DAGoodFlowList(DAFlowMap.create());
     }
 
+    public static DAGoodFlowList create(DAUniqueID wareClassID, double flow, Unit unit) {
+        return create(DAGoodFlow.create(wareClassID, DAValue.create(flow, unit)));
+    }
+
+    public static DAGoodFlowList create(DAGoodFlow gf) {
+        DAGoodFlowList gfl = new DAGoodFlowList(DAFlowMap.create());
+        gfl.add(gf);
+        return gfl;
+    }
+
 //    public DAGoodFlowList(DAGoodFlowList other) {
 //        super();
 //        goodFlow = new DAFlowMap(DAGoodFlow.class);
@@ -41,6 +59,23 @@ public class DAGoodFlowList extends DataAtom {
     @Deprecated
     public DAGoodFlowList() {
         goodFlow = null;
+    }
+
+    public final void add(DAGoodFlow flow) {
+        DAGoodFlow gf = goodFlow.get(flow.wareClassID);
+        if (gf != null) {
+            if (! flow.flow.getUnit().isCompatible(gf.flow.getUnit())) {
+                String s = "Unit <" + gf.flow.getUnit() + "> and <" + flow.flow.getUnit() + "> of "
+                        + flow.wareClassID + " are incompatible!";
+                Log.fatal(DAGoodFlowList.class, s);
+                throw new IllegalArgumentException(s);
+            }
+            final DAValue v1 = gf.flow;
+            final DAValue v2 = flow.flow;
+            goodFlow.set(flow.wareClassID, DAGoodFlow.create(flow.wareClassID, v1.add(v2)));
+        } else {
+            goodFlow.set(flow.wareClassID, flow);
+        }
     }
 
     public final void add(DAGoodFlowList flowList) {

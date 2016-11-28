@@ -128,6 +128,12 @@ public abstract class DABasicModule extends DATickable implements IDAWare {
         lastError = null;
     }
 
+    @Deprecated
+    @Override
+    public void init(DAWareTypeTree tree) {
+        throw new IllegalAccessError("DAModlueContainer");
+    }
+
     public void init(DAWareTypeTree tree, DABasicModule parent) {
         wareClass = (DABasicModuleClass) tree.getWareClass(classID);
         if (wareClass == null) {
@@ -156,6 +162,18 @@ public abstract class DABasicModule extends DATickable implements IDAWare {
     @Override
     public String toString() {
         return itemName + " (" + state + ")";
+    }
+
+    @Deprecated
+    @Override
+    public boolean add(DAValue<Pieces> value) {
+        return false;
+    }
+
+    @Deprecated
+    @Override
+    public boolean sub(DAValue<Pieces> value) {
+        return false;
     }
 
     public void setOnline(boolean on) {
@@ -436,6 +454,10 @@ public abstract class DABasicModule extends DATickable implements IDAWare {
     }
 
     private static final byte VERSION = 1;
+
+    protected DABasicModule(DABasicModuleClass c, ModuleType type, DAText name) {
+        this(State.OFFLINE, type, c.onlineDelay, c.maxHitPoints, c.id, name);
+    }
 
     protected DABasicModule(State state, ModuleType type, DAValue<Duration> delayToGo
             , DAValue<Energy> actHitPoints, DAUniqueID wareClassID, DAText itemName) {

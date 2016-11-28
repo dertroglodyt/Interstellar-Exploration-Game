@@ -11,8 +11,18 @@
 
 package de.hdc.commonlibrary.market;
 
+import javax.measure.quantity.Mass;
+import javax.measure.quantity.Volume;
+import javax.measure.unit.SI;
+
+import de.hdc.commonlibrary.data.atom.DABoolean;
 import de.hdc.commonlibrary.data.atom.DAText;
 import de.hdc.commonlibrary.data.atom.DAUniqueID;
+import de.hdc.commonlibrary.data.atom.DAValue;
+import de.hdc.commonlibrary.data.quantity.Pieces;
+import de.hdc.commonlibrary.module.DADamage;
+import de.hdc.commonlibrary.module.DAGoodFlowList;
+import de.hdc.commonlibrary.moduleclass.DABasicModuleClass;
 
 /**
  * Initial tree of all WareTypes (which hold all WareClasses).
@@ -21,7 +31,60 @@ import de.hdc.commonlibrary.data.atom.DAUniqueID;
  */
 public final class DAWareTypeTreeBootstrap {
 
-        private static enum DefWaresTree {
+    public static final DAWareClass ELECTRICAL_POWER = DAWareClass.create(
+            DAUniqueID.parse("00000000000000000000000000000001")
+            , DefWaresTree.Goods_Raw.id
+            , DAText.create("Electrical Power"), DAText.create("Needs description"), DAWareClass.Size.NONE
+            , DAWareClass.State.PUBLIC, SI.JOULE, DAValue.<Mass>create(0, SI.KILOGRAM), DAValue.<Volume>create(0, SI.CUBIC_METRE)
+            , DAText.create("Electrical Power"));
+
+    // todo fill in sane values for damage resistance and used energy
+    public static final DABasicModuleClass CONTAINER_MINI = DABasicModuleClass.create(
+            DAUniqueID.parse("00000000000000000000000000000100")
+            , DefWaresTree.Goods.id, DAText.create("Container mini"), DAText.create("Needs description")
+            , DAWareClass.Size.MINI, DAWareClass.State.PUBLIC, Pieces.UNIT
+            , DAWareClass.Size.MINI.mass, DAWareClass.Size.MINI.volume, DAText.create("ContainerMini")
+            , DAGoodFlowList.create(ELECTRICAL_POWER.id, -5, SI.JOULE), DAValue.create(1000, SI.JOULE)
+            , new DADamage(DAValue.create(10000, SI.JOULE), DAValue.create(100, SI.JOULE), DAValue.create(1000, SI.JOULE))
+            , DAValue.create(10, SI.SECOND), DABoolean.FALSE, new DAPatentSet());
+
+    public static final DABasicModuleClass CONTAINER_SMALL = DABasicModuleClass.create(
+            DAUniqueID.parse("00000000000000000000000000000101")
+            , DefWaresTree.Goods.id, DAText.create("Container small"), DAText.create("Needs description")
+            , DAWareClass.Size.SMALL, DAWareClass.State.PUBLIC, Pieces.UNIT
+            , DAWareClass.Size.SMALL.mass, DAWareClass.Size.SMALL.volume, DAText.create("ContainerSmall")
+            , DAGoodFlowList.create(ELECTRICAL_POWER.id, -5, SI.JOULE), DAValue.create(1000, SI.JOULE)
+            , new DADamage(DAValue.create(10000, SI.JOULE), DAValue.create(100, SI.JOULE), DAValue.create(1000, SI.JOULE))
+            , DAValue.create(10, SI.SECOND), DABoolean.FALSE, new DAPatentSet());
+
+    public static final DABasicModuleClass CONTAINER_MEDIUM = DABasicModuleClass.create(
+            DAUniqueID.parse("00000000000000000000000000000102")
+            , DefWaresTree.Goods.id, DAText.create("Container medium"), DAText.create("Needs description")
+            , DAWareClass.Size.MEDIUM, DAWareClass.State.PUBLIC, Pieces.UNIT
+            , DAWareClass.Size.MEDIUM.mass, DAWareClass.Size.MEDIUM.volume, DAText.create("ContainerMedium")
+            , DAGoodFlowList.create(ELECTRICAL_POWER.id, -5, SI.JOULE), DAValue.create(1000, SI.JOULE)
+            , new DADamage(DAValue.create(10000, SI.JOULE), DAValue.create(100, SI.JOULE), DAValue.create(1000, SI.JOULE))
+            , DAValue.create(10, SI.SECOND), DABoolean.FALSE, new DAPatentSet());
+
+    public static final DABasicModuleClass CONTAINER_LARGE = DABasicModuleClass.create(
+            DAUniqueID.parse("00000000000000000000000000000103")
+            , DefWaresTree.Goods.id, DAText.create("Container large"), DAText.create("Needs description")
+            , DAWareClass.Size.LARGE, DAWareClass.State.PUBLIC, Pieces.UNIT
+            , DAWareClass.Size.LARGE.mass, DAWareClass.Size.LARGE.volume, DAText.create("ContainerLarge")
+            , DAGoodFlowList.create(ELECTRICAL_POWER.id, -5, SI.JOULE), DAValue.create(1000, SI.JOULE)
+            , new DADamage(DAValue.create(10000, SI.JOULE), DAValue.create(100, SI.JOULE), DAValue.create(1000, SI.JOULE))
+            , DAValue.create(10, SI.SECOND), DABoolean.FALSE, new DAPatentSet());
+
+    public static final DABasicModuleClass CONTAINER_GIANT = DABasicModuleClass.create(
+            DAUniqueID.parse("00000000000000000000000000000103")
+            , DefWaresTree.Goods.id, DAText.create("Container giant"), DAText.create("Needs description")
+            , DAWareClass.Size.GIANT, DAWareClass.State.PUBLIC, Pieces.UNIT
+            , DAWareClass.Size.GIANT.mass, DAWareClass.Size.GIANT.volume, DAText.create("ContainerGiant")
+            , DAGoodFlowList.create(ELECTRICAL_POWER.id, -5, SI.JOULE), DAValue.create(1000, SI.JOULE)
+            , new DADamage(DAValue.create(10000, SI.JOULE), DAValue.create(100, SI.JOULE), DAValue.create(1000, SI.JOULE))
+            , DAValue.create(10, SI.SECOND), DABoolean.FALSE, new DAPatentSet());
+
+    private static enum DefWaresTree {
         Blueprint("f0000000000000000000000000000001", "Blaupause", ""),
         Blueprint_Half("f0000000000000000000000000000002", "Halbfertige Güter", "Güter für die Weiterverarbeitung."),
         Blueprint_Finished("f0000000000000000000000000000003", "Fertigwaren", "Alle Arten von Fertigwaren."),
@@ -115,17 +178,20 @@ public final class DAWareTypeTreeBootstrap {
 
     }
 
+    /**
+     * Must be public to create container when packaging wares in a storage.
+     */
     private enum DefWareClass {
-        Electrical_Power(DefWaresTree.Goods_Raw, "00000000000000000000000000000001"),
+        //Electrical_Power(DefWaresTree.Goods_Raw, "00000000000000000000000000000001"),
         Anti_Matter(DefWaresTree.Goods_Raw, "00000000000000000000000000000002"),
         Blueprint(DefWaresTree.Goods, "00000000000000000000000000000003"),
         Person(DefWaresTree.Goods, "00000000000000000000000000000004"),
 
-        Standard_Container_Mini(DefWaresTree.Goods, "00000000000000000000000000000100"),
-        Standard_Container_Small(DefWaresTree.Goods, "00000000000000000000000000000101"),
-        Standard_Container_Medium(DefWaresTree.Goods, "00000000000000000000000000000102"),
-        Standard_Container_Large(DefWaresTree.Goods, "00000000000000000000000000000103"),
-        Standard_Container_Giant(DefWaresTree.Goods, "00000000000000000000000000000104"),
+//        Standard_Container_Mini(DefWaresTree.Goods, "00000000000000000000000000000100"),
+//        Standard_Container_Small(DefWaresTree.Goods, "00000000000000000000000000000101"),
+//        Standard_Container_Medium(DefWaresTree.Goods, "00000000000000000000000000000102"),
+//        Standard_Container_Large(DefWaresTree.Goods, "00000000000000000000000000000103"),
+//        Standard_Container_Giant(DefWaresTree.Goods, "00000000000000000000000000000104"),
 
         O2(DefWaresTree.Goods_Gas, "00000000000000000000000000000200"),
         H2(DefWaresTree.Goods_Gas, "00000000000000000000000000000201"),
@@ -158,7 +224,8 @@ public final class DAWareTypeTreeBootstrap {
         Factory_Frigate(DefWaresTree.Module_Giant, "00000000000000000000000000020001"),
         Station_Hangar(DefWaresTree.Module_Giant, "00000000000000000000000000020002"),
         Station_Storage(DefWaresTree.Module_Giant, "00000000000000000000000000020003"),
-        Station_Rentable_Storage(DefWaresTree.Module_Giant, "00000000000000000000000000020004"),;
+        Station_Rentable_Storage(DefWaresTree.Module_Giant, "00000000000000000000000000020004")
+        ;
 
         public final DAText displayName;
         public final DAUniqueID fClassID;
@@ -191,9 +258,21 @@ public final class DAWareTypeTreeBootstrap {
         }
         for (DefWareClass t : DefWareClass.values()) {
 //            System.out.println(t.displayName);
-            DAWareTypeTreeNode parent = root.findChild(t.typeID);
+            DAWareTypeTreeNode parent = root.findWareClassType(t.typeID);
             parent.addWareClass(DAWareClass.create(t.fClassID, t.typeID, t.displayName));
         }
+        DAWareTypeTreeNode parent = root.findWareClassType(ELECTRICAL_POWER.typeID);
+        parent.addWareClass(ELECTRICAL_POWER);
+        parent = root.findWareClassType(CONTAINER_MINI.typeID);
+        parent.addWareClass(CONTAINER_MINI);
+        parent = root.findWareClassType(CONTAINER_SMALL.typeID);
+        parent.addWareClass(CONTAINER_SMALL);
+        parent = root.findWareClassType(CONTAINER_MEDIUM.typeID);
+        parent.addWareClass(CONTAINER_MEDIUM);
+        parent = root.findWareClassType(CONTAINER_LARGE.typeID);
+        parent.addWareClass(CONTAINER_LARGE);
+        parent = root.findWareClassType(CONTAINER_GIANT.typeID);
+        parent.addWareClass(CONTAINER_GIANT);
         return root;
     }
 

@@ -14,10 +14,10 @@ import javax.measure.unit.SI;
 import de.hdc.commonlibrary.data.atom.DAArray;
 import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DAValue;
-import de.hdc.commonlibrary.data.quantity.Pieces;
-import de.hdc.commonlibrary.market.DAWare;
 import de.hdc.commonlibrary.market.DAWareClass;
 import de.hdc.commonlibrary.market.DAWareTypeTree;
+
+import static de.hdc.commonlibrary.market.DAWareTypeTreeBootstrap.ELECTRICAL_POWER;
 
 /**
  * Entity (like a ship or a station) that contains modules.
@@ -341,10 +341,10 @@ public class DAModuleContainer extends DABasicModule {
 
     @Override
     public DAValue<Energy> getOnlinePower() {
-        DAGoodFlow gf = combinedGoodFlows.get(DAWareClass.ELECTRICAL_POWER);
+        DAGoodFlow gf = combinedGoodFlows.get(ELECTRICAL_POWER);
         if (gf == null) {
-            gf = DAGoodFlow.create(DAWareClass.ELECTRICAL_POWER.id, DAValue.<Energy>create(0, SI.JOULE));
-            combinedGoodFlows.set(DAWareClass.ELECTRICAL_POWER, gf);
+            gf = DAGoodFlow.create(ELECTRICAL_POWER.id, DAValue.<Energy>create(0, SI.JOULE));
+            combinedGoodFlows.set(ELECTRICAL_POWER, gf);
         }
         return (DAValue<Energy>) gf.flow;
     }
@@ -472,25 +472,5 @@ public class DAModuleContainer extends DABasicModule {
 //            }
 //        }
 //    }
-
-    @Override
-    public void init(DAWareTypeTree tree) {
-
-    }
-
-    @Override
-    public boolean add(DAValue<Pieces> value) {
-        return false;
-    }
-
-    @Override
-    public boolean sub(DAValue<Pieces> value) {
-        return false;
-    }
-
-    @Override
-    public DAWare.SubType getSubType() {
-        return null;
-    }
 
 }

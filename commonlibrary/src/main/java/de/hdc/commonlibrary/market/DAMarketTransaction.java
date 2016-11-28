@@ -1,4 +1,10 @@
 /*
+ *  Created by DerTroglodyt on 2016-11-28 16:52
+ *  Email dertroglodyt@gmail.com
+ *  Copyright by HDC, Germany
+ */
+
+/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -40,27 +46,27 @@ public class DAMarketTransaction extends DataAtom {
     public final DAText what;
     public final DAValue<Money> price;
 
-    public static DAMarketTransaction createBill(DAOrganizationBasic billing, DAOrganizationBasic paying, String what, DAValue<Money> price) {
+    public static DAMarketTransaction createBill(IDAOwner billing, IDAOwner paying, String what, DAValue<Money> price) {
         return new DAMarketTransaction(billing, paying, what, price, Type.SOLD_TO);
     }
 
-    public static DAMarketTransaction createReceipt(DAOrganizationBasic billing, DAOrganizationBasic paying, String what, DAValue<Money> price) {
+    public static DAMarketTransaction createReceipt(IDAOwner billing, IDAOwner paying, String what, DAValue<Money> price) {
         return new DAMarketTransaction(billing, paying, what, price, Type.BOUGHT_FROM);
     }
 
-    public static DAMarketTransaction createTaxBill(DAOrganizationBasic billing, DAOrganizationBasic paying, String what, DAValue<Money> price) {
+    public static DAMarketTransaction createTaxBill(IDAOwner billing, IDAOwner paying, String what, DAValue<Money> price) {
         return new DAMarketTransaction(billing, paying, what, price, Type.TAX_TO);
     }
 
-    public static DAMarketTransaction createTaxReceipt(DAOrganizationBasic billing, DAOrganizationBasic paying, String what, DAValue<Money> price) {
+    public static DAMarketTransaction createTaxReceipt(IDAOwner billing, IDAOwner paying, String what, DAValue<Money> price) {
         return new DAMarketTransaction(billing, paying, what, price, Type.TAX_FROM);
     }
 
-    public static DAMarketTransaction createDonationTo(DAOrganizationBasic receiving, DAOrganizationBasic donating, String what, DAValue<Money> price) {
+    public static DAMarketTransaction createDonationTo(IDAOwner receiving, IDAOwner donating, String what, DAValue<Money> price) {
         return new DAMarketTransaction(receiving, donating, what, price, Type.DONATION_TO);
     }
 
-    public static DAMarketTransaction createDonationFrom(DAOrganizationBasic receiving, DAOrganizationBasic donating, String what, DAValue<Money> price) {
+    public static DAMarketTransaction createDonationFrom(IDAOwner receiving, IDAOwner donating, String what, DAValue<Money> price) {
         return new DAMarketTransaction(receiving, donating, what, price, Type.DONATION_FROM);
     }
 
@@ -150,9 +156,9 @@ public class DAMarketTransaction extends DataAtom {
     private static final byte VERSION = 1;
 
     //todo warum kein amount?
-    private DAMarketTransaction(DAOrganizationBasic target, DAOrganizationBasic source,
+    private DAMarketTransaction(IDAOwner target, IDAOwner source,
                                 String what, DAValue<Money> price, Type type) {
-        this(DADateTime.now(), target.id, source.id, target.name, source.name
+        this(DADateTime.now(), target.getId(), source.getId(), target.getName(), source.getName()
                 , DAValue.<Pieces>create(1, NewUnits.PIECES), DAText.create(what), price, type);
     }
 

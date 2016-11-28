@@ -27,7 +27,6 @@ import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.atom.DataAtom;
 import de.hdc.commonlibrary.data.compound.DAResult;
 import de.hdc.commonlibrary.data.quantity.Pieces;
-import de.hdc.commonlibrary.module.DABasicModule;
 import de.hdc.commonlibrary.module.DAModuleContainer;
 import de.hdc.commonlibrary.module.DAShip;
 import de.hdc.commonlibrary.module.DAStorage;
@@ -226,8 +225,8 @@ public class DAMarket extends DataAtom {
      * @param scriptID
      * @return
      */
-    public DAResult<DAWare> buy(DAStorage targetStorage, DAOrder so, DAValue<Pieces> amount
-            , DAUniqueID scriptID, DAUserMap userMap) {
+    public DAResult<IDAWare> buy(DAStorage targetStorage, DAOrder so, DAValue<Pieces> amount
+            , DAUniqueID scriptID, OrganisationMap userMap) {
         synchronized (orders) {
             if (so == null) {
                 return DAResult.createWarning("Order is NULL!.", "DAMarket.buy");
@@ -268,7 +267,7 @@ public class DAMarket extends DataAtom {
                 if (!rf.isOK()) {
                     return DAResult.createFailed(rf.getMessage(), "DAMarket.buy");
                 }
-                DAOrganizationBasic buyer = userMap.get(targetStorage.getLeaserID());
+                IDAOwner buyer = userMap.getOrganisation(targetStorage.getLeaserID());
                 if (buyer == null) {
                     return DAResult.createWarning("No valid buyer found in WorldNode.", "DAMarket.buy");
                 }
@@ -276,7 +275,7 @@ public class DAMarket extends DataAtom {
                 if (sto == null) {
                     return DAResult.createWarning("Order source storage not found in ship.", "DAMarket.buy");
                 }
-                DAOrganizationBasic owner = userMap.get(sto.getLeaserID());
+                IDAOwner owner = userMap.getOrganisation(sto.getLeaserID());
                 if (owner == null) {
                     return DAResult.createWarning("No valid order owner found in WorldNode.", "DAMarket.buy");
                 }
@@ -292,7 +291,7 @@ public class DAMarket extends DataAtom {
 //                if (! sto.remove(so.getSellAmount())) {
 //                    return DAResult.createFailed("Could not take requested ware from storage.", "DAMarket.buy");
 //                }
-                DAResult<DAWare> r = owner.transaction(smt);
+                DAResult<IDAWare> r = owner.transaction(smt);
                 if (! r.isOK()) {
 //                    DAResult r2 = sto.add(so.getSellAmount());
 //                    if (! r2.isOK()) {
@@ -311,7 +310,7 @@ public class DAMarket extends DataAtom {
                     owner.undoTransaction(smt);
                     return r;
                 }
-                final DAResult<DAWare> r2 = targetStorage.addAmount(wa);
+                final DAResult<IDAWare> r2 = targetStorage.addAmount(wa);
                 if (! r2.isOK()) {
                     order.remove(amount.sub(r2.getResult().getAmount()));
                     Log.warn(DAMarket.class, "buy: Can not add wares to storage: " + so.ware.getAmount());

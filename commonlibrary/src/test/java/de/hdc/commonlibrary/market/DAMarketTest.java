@@ -36,6 +36,7 @@ public class DAMarketTest {
     @Test
     public void toStream() throws Exception {
         DAWareTypeTreeNode wt = DAWareTypeTreeBootstrap.create();
+        wt.toString();
         DAWareClass wc = wt.findWareClass(DAUniqueID.parse("00000000000000000000000000000002"));
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
@@ -57,7 +58,7 @@ public class DAMarketTest {
         expected.addOrder(DAOrder.create(DAOrder.Type.BUY_ORDER
                 , DAWare.create(wc, DAValue.create("1 pcs"))
                 , DAValue.<Money>create(1, Currency.EUR), DADateTime.now(), DAUniqueID.createRandom()
-                , DAUniqueID.createRandom(), DAText.create("A Description of this oerder.")
+                , DAUniqueID.createRandom(), DAText.create("A Description of this order.")
                 , DAValue.<Pieces>create("0")
                 , DAValue.<Duration>create("0 s"), DADateTime.now()));
         expected.toStream(new DataOutputStream(bos));

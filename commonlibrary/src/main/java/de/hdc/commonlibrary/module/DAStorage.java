@@ -31,12 +31,11 @@ import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.compound.DAResult;
 import de.hdc.commonlibrary.data.quantity.Pieces;
-import de.hdc.commonlibrary.market.DAOrganizationBasic;
+import de.hdc.commonlibrary.market.DAOwnerBasic;
 import de.hdc.commonlibrary.market.DAWare;
 import de.hdc.commonlibrary.market.DAWareClass;
 import de.hdc.commonlibrary.market.DAWareTypeTree;
 import de.hdc.commonlibrary.market.IDAWare;
-import de.hdc.commonlibrary.moduleclass.DABasicModuleClass;
 
 import static javax.measure.unit.SI.CUBIC_METRE;
 
@@ -53,7 +52,7 @@ public class DAStorage extends DABasicModule {
     private DAArray<DALogItem<DAWaresContainer>> container;
     private DAUniqueID leaserID;
 
-    private transient DAOrganizationBasic leasert;
+    private transient DAOwnerBasic leasert;
 
     @Deprecated
     public DAStorage() {
@@ -130,9 +129,9 @@ public class DAStorage extends DABasicModule {
             return DAResult.createFailed("Lagerraum ist nicht online.", "DAStorage.canAdd");
         }
         DAValue<Volume> v = DAValue.create(0, CUBIC_METRE);
-        DAWareClass.Size size = wareClass.getSize();
+        DAWareClass.Size size = getWareClass().size;
         for (DAWaresContainer wc : container) {
-            if (wc.wareClass.getSize().isBiggerOrEqual(size)) {
+            if (wc.getWareClass().size.isBiggerOrEqual(size)) {
                 return DAResult.createFailed("Container type does not fit into storage.", "DAStorage.canAdd");
             }
             v = v.add(wc.getVolume());
@@ -147,10 +146,10 @@ public class DAStorage extends DABasicModule {
         if (! isOnline()) {
             return DAResult.createFailed("Lagerraum ist nicht online.", "DAStorage.canAdd");
         }
-        if (container.getWareClass.getSize().isBiggerOrEqual(wareClass.getSize())) {
+        if (container.getWareClass().size.isBiggerOrEqual(getWareClass().size)) {
             return DAResult.createFailed("Container type does not fit into storage.", "DAStorage.canAdd");
         }
-        if (getFreeSpace().isLessThan(container.getVolume())) {
+        if (getFreeSpace().isSmallerThan(container.getVolume())) {
             return DAResult.createFailed("Not enough free space.", "DAStorage.canAdd");
         }
         return DAResult.createOK("ok", "DAStorage.canAdd");
@@ -174,12 +173,8 @@ public class DAStorage extends DABasicModule {
         if (! r.isOK()) {
             return r;
         }
-        boolean br = this.container.add(new DALogItem<DAWaresContainer>(container));
-        if (br) {
-            return DAResult.createOK("ok", "DAStorage.add");
-        } else {
-            return DAResult.createWarning("Could not add ware to storage.", "DAStorage.add");
-        }
+        this.container.add(new DALogItem<DAWaresContainer>(container));
+        return DAResult.createOK("ok", "DAStorage.add");
     }
 
     /**
@@ -220,14 +215,14 @@ public class DAStorage extends DABasicModule {
      * @param wa
      * @return
      */
-    public DAResult<DAWare> addAmount(DAWare wa) {
-        DAArray<DAWaresContainer> vwc = DAWaresContainer.packageWare(wa.getWare(), wa.getAmount(), this);
+    public DAResult<IDAWare> addAmount(DAWare wa) {
+        DAArray<DAWaresContainer> vwc = DAWaresContainer.packageWare(wa, wa.getAmount(), this);
         DAResult<DAArray<DAWaresContainer>> r = add(vwc);
         wa.sub(wa.getAmount());
         for (DAWaresContainer c : r.getResult()) {
             wa.add(c.getActualAmount());
         }
-        return new DAResult<DAWare>(r.getMessage(), r.getResultType(), wa, "DAStorage.addAmount");
+        return new DAResult<IDAWare>(r.getMessage(), r.getResultType(), wa, "DAStorage.addAmount");
     }
 
     public DALogItem<DAWaresContainer> get(DAWaresContainer wc) {
@@ -331,7 +326,7 @@ public class DAStorage extends DABasicModule {
         if (wc == null) {
             return new DAResult<DAWaresContainer>("Container not in storage.", DAResult.ResultType.WARNING, "DAStorage");
         }
-        if (a.doubleValue() <= 0) {
+        if (a.doubleValueBase() <= 0) {
             return new DAResult<DAWaresContainer>("Amount must be greater than 0.", DAResult.ResultType.WARNING, "DAStorage");
         }
         if (a.isGreaterThan(wc.getActualAmount())) {
@@ -382,7 +377,6 @@ public class DAStorage extends DABasicModule {
 
         DAArray<DALogItem<DAWaresContainer>> athings = new DAArray().fromStream(stream);
         DAUniqueID aleaserID = new DAUniqueID().fromStream(stream);
-        )
         return new DAStorage(super.fromStream(stream), container, aleaserID);
     }
 

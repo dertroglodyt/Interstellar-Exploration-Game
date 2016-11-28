@@ -133,7 +133,7 @@ public class TankPool implements IDataAtom {
             id.toStream(stream);
             stream.writeInt(table.get(id).size());
             for (DAAbstractTank t : table.get(id)) {
-                stream.writeUTF(t.getSubType().toString());
+                stream.writeUTF(t.getClass().toString());
                 t.toStream(stream);
             }
         }
@@ -154,13 +154,10 @@ public class TankPool implements IDataAtom {
             for (int k = 0; k < y; k++) {
                 try {
                     final Class<?> c = Class.forName(stream.readUTF());
+                    // todo: what happens if the tank saves own variables in addition to AbstractTanks???
                     final DAAbstractTank t = (DAAbstractTank) ((DAAbstractTank) c.newInstance()).fromStream(stream);
                     al.add(t);
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                     e.printStackTrace();
                 }
             }
