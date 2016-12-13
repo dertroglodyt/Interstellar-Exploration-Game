@@ -28,7 +28,10 @@ public class MarketHandler implements IActionHandler {
         this.market = market;
     }
 
-    public static enum Parameters implements IParameterType {
+    /**
+     * Valid parameters in a remote action.
+     */
+    public enum Parms implements IParameterType {
 
         NONE(null),
         SHIPID(DAUniqueID.class),
@@ -46,7 +49,7 @@ public class MarketHandler implements IActionHandler {
         private DAText name;
         private Class<? extends IDataAtom> c;
 
-        Parameters(Class<? extends IDataAtom> aClass) {
+        Parms(Class<? extends IDataAtom> aClass) {
             name = DAText.create(this.toString());
             c = aClass;
         }
@@ -63,18 +66,21 @@ public class MarketHandler implements IActionHandler {
 
     }
 
-    public static enum Action implements IRemoteActionType {
-        ADD_ORDERS(Parameters.NONE, Parameters.SHIPID, Parameters.ORDERS),
-        REMOVE_ORDERS(Parameters.NONE, Parameters.SHIPID, Parameters.ORDERS),
-        GET_BUYING(Parameters.ORDERS, Parameters.SHIPID),
-        GET_SELLING(Parameters.ORDERS, Parameters.SHIPID),
-        GET_BUYING_W(Parameters.ORDERS, Parameters.SHIPID, Parameters.WARE),
-        GET_SELLING_W(Parameters.ORDERS, Parameters.SHIPID, Parameters.WARE),
-        GET_BUYING_WT(Parameters.ORDERS, Parameters.SHIPID, Parameters.WARESTYPE),
-        GET_SELLING_WT(Parameters.ORDERS, Parameters.SHIPID, Parameters.WARESTYPE),
-        BUY(Parameters.NONE, Parameters.SHIPID, Parameters.STORAGEID, Parameters.ORDER, Parameters.AMOUNT, Parameters.SCRIPT_ID),
-        SELL(Parameters.NONE, Parameters.SHIPID, Parameters.STORAGEID, Parameters.ORDER, Parameters.CONTAINERLIST, Parameters.SCRIPT_ID),
-        SPLIT(Parameters.CONTAINER, Parameters.SHIPID, Parameters.STORAGEID, Parameters.CONTAINER, Parameters.AMOUNT),;
+    /**
+     * Valid remote actions and their parameters.
+     */
+    public enum Action implements IRemoteActionType {
+        ADD_ORDERS(Parms.NONE, Parms.SHIPID, Parms.ORDERS),
+        REMOVE_ORDERS(Parms.NONE, Parms.SHIPID, Parms.ORDERS),
+        GET_BUYING(Parms.ORDERS, Parms.SHIPID),
+        GET_SELLING(Parms.ORDERS, Parms.SHIPID),
+        GET_BUYING_W(Parms.ORDERS, Parms.SHIPID, Parms.WARE),
+        GET_SELLING_W(Parms.ORDERS, Parms.SHIPID, Parms.WARE),
+        GET_BUYING_WT(Parms.ORDERS, Parms.SHIPID, Parms.WARESTYPE),
+        GET_SELLING_WT(Parms.ORDERS, Parms.SHIPID, Parms.WARESTYPE),
+        BUY(Parms.NONE, Parms.SHIPID, Parms.STORAGEID, Parms.ORDER, Parms.AMOUNT, Parms.SCRIPT_ID),
+        SELL(Parms.NONE, Parms.SHIPID, Parms.STORAGEID, Parms.ORDER, Parms.CONTAINERLIST, Parms.SCRIPT_ID),
+        SPLIT(Parms.CONTAINER, Parms.SHIPID, Parms.STORAGEID, Parms.CONTAINER, Parms.AMOUNT),;
 
         @Override
         public DAText getName() {
@@ -97,8 +103,6 @@ public class MarketHandler implements IActionHandler {
 
         Action(IParameterType r, IParameterType... in) {
             name = DAText.create(this.toString());
-//            input = new ArrayList<IParameterType>(in.length);
-//            input.addAll(Arrays.asList(in));
             input = Collections.unmodifiableList(Arrays.asList(in));
             result = r;
         }
@@ -107,10 +111,28 @@ public class MarketHandler implements IActionHandler {
 
     }
 
+    /**
+     * Handles an action and gives a result message back to sender.
+     * @param action The action that should be executed by this handler.
+     * @return The result as a message returned to the sender.
+     */
     @Override
-    public DAResult<?> handle(DARemoteAction action) {
-        action.parm.validate(Action.valueOf(action.actionName.toString()));
-        return DAResult.createFailed("MarketHandler.handle", "Unknown error");
+    public DARemoteAction handle(DARemoteAction action) {
+        if (! action.parm.validate(Action.valueOf(action.actionName.toString()))) {
+            return DARemoteAction.create(action, DAResult.createFailed("MarketHandler.handle", "Action is invalid!" + action.toString()));
+        }
+        if (action.destinationType != DARemoteAction.Type.MARKET) {
+            return DARemoteAction.create(action, DAResult.createFailed("MarketHandler.handle", "Action dest. type is not MARKET!" + action.toString()));
+        }
+        if (action.destinationID != market.id) {
+            return DARemoteAction.create(action, DAResult.createFailed("MarketHandler.handle", "Action dest. is not this market!" + action.toString()));
+        }
+        switch (Action.valueOf(action.actionName.toString())) {
+            case ADD_ORDERS: {
+                return DARemoteAction.create(action, DAResult.createFailed("MarketHandler.handle", "Not implemented yet!" + action.toString()));
+            }
+        }
+        return DARemoteAction.create(action, DAResult.createFailed("MarketHandler.handle", "Unknown error!" + action.toString()));
     }
 
     private final DAMarket market;

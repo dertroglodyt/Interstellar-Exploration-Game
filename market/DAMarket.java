@@ -17,6 +17,8 @@ import java.util.Iterator;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.unit.NonSI;
 
+import de.dertroglodyt.common.protocol.IParameterType;
+import de.dertroglodyt.common.protocol.IRemoteActionType;
 import de.dertroglodyt.iegcommon.DAClan;
 import de.dertroglodyt.iegcommon.module.DAModuleContainer;
 import de.dertroglodyt.iegcommon.module.DAbmHangar;
@@ -33,8 +35,6 @@ import de.hdc.commonlibrary.data.types.atom.DAValue;
 import de.hdc.commonlibrary.data.types.atom.DataAtom;
 import de.hdc.commonlibrary.data.types.collection.DAVector;
 import de.hdc.commonlibrary.data.types.compound.DAResult;
-import de.hdc.commonlibrary.protocol.IParameterType;
-import de.hdc.commonlibrary.protocol.IRemoteActionType;
 import de.hdc.commonlibrary.util.Log;
 
 /**

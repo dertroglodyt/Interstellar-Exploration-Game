@@ -14,6 +14,7 @@ import java.io.IOException;
 import de.hdc.commonlibrary.data.atom.DAText;
 import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DataAtom;
+import de.hdc.commonlibrary.data.compound.DAResult;
 
 /**
  *
@@ -36,6 +37,7 @@ public class DARemoteAction extends DataAtom {
     public final DAUniqueID destinationID;
     public final DAText actionName;
     public final DAParameterList parm;
+    public final DAResult result;
 
     @Deprecated
     public DARemoteAction() {
@@ -46,6 +48,12 @@ public class DARemoteAction extends DataAtom {
         destinationID = null;
         actionName = null;
         parm = null;
+        result = null;
+    }
+
+    public static DARemoteAction create(DARemoteAction action, DAResult result) {
+        return new DARemoteAction(action.destinationType, action.destinationID, action.senderType, action.senderID
+                , action.actionName, action.parm, result);
     }
 
     public DARemoteAction(Type sender, DAUniqueID senderID, Type destination, DAUniqueID destinationID
@@ -74,6 +82,7 @@ public class DARemoteAction extends DataAtom {
         this.destinationID = destinationID;
         actionName = action.getName();
         parm = parms;
+        result = null;
     }
 
     @Override
@@ -91,6 +100,10 @@ public class DARemoteAction extends DataAtom {
         destinationID.toStream(stream);
         actionName.toStream(stream);
         parm.toStream(stream);
+        stream.writeBoolean(result != null);
+        if (result != null) {
+            result.toStream(stream);
+        }
     }
 
     @Override
@@ -104,15 +117,19 @@ public class DARemoteAction extends DataAtom {
         Type aDestinationType = Type.valueOf(stream.readUTF());
         DAUniqueID aDestinationID = new DAUniqueID().fromStream(stream);
         DAText aName = new DAText().fromStream(stream);
+        DAResult aResult = null;
         DAParameterList aParm = new DAParameterList().fromStream(stream);
+        if (stream.readBoolean()) {
+            aResult = new DAResult<>().fromStream(stream);
+        }
 
-        return new DARemoteAction(aSenderType, aSenderID, aDestinationType, aDestinationID, aName, aParm);
+        return new DARemoteAction(aSenderType, aSenderID, aDestinationType, aDestinationID, aName, aParm, aResult);
     }
 
     private static final byte VERSION = 1;
 
     private DARemoteAction(Type sender, DAUniqueID senderID, Type destination, DAUniqueID destinationID
-            , DAText action, DAParameterList parms) {
+            , DAText action, DAParameterList parms, DAResult result) {
         super();
         senderType = sender;
         this.senderID = senderID;
@@ -120,6 +137,7 @@ public class DARemoteAction extends DataAtom {
         this.destinationID = destinationID;
         actionName = action;
         parm = parms;
+        this.result = result;
     }
 
 }

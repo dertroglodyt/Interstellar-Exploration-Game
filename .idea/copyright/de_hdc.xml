@@ -1,7 +1,0 @@
-<component name="CopyrightManager">
-  <copyright>
-    <option name="allowReplaceKeyword" value="template" />
-    <option name="myName" value="de.hdc" />
-    <option name="notice" value=" #set (&amp;#36;USER = &quot;DerTroglodyt&quot;)&#10; #set (&amp;#36;COMPANY = &quot;HDC, Germany&quot;)&#10; #set (&amp;#36;EMAIL = &quot;dertroglodyt@gmail.com&quot;)&#10; Created by &amp;#36;{USER} on &amp;#36;{today.format(&quot;YYYY-MM-dd HH:mm&quot;)}&#10; Email &amp;#36;{EMAIL}&#10; Copyright by &amp;#36;{COMPANY}" />
-  </copyright>
-</component>

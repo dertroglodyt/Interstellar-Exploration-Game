@@ -11,6 +11,7 @@ import java.io.ObjectOutput;
 
 import javax.measure.converter.ConversionException;
 
+import de.dertroglodyt.common.protocol.DAParameterList;
 import de.dertroglodyt.iegcommon.module.DAbmWaresContainer;
 import de.hdc.commonlibrary.data.SerialUIDPool;
 import de.hdc.commonlibrary.data.quantity.NewUnits;
@@ -18,7 +19,6 @@ import de.hdc.commonlibrary.data.quantity.Pieces;
 import de.hdc.commonlibrary.data.types.atom.DAValue;
 import de.hdc.commonlibrary.data.types.atom.DataAtom;
 import de.hdc.commonlibrary.data.types.collection.DAVector;
-import de.hdc.commonlibrary.protocol.DAParameterList;
 import de.hdc.commonlibrary.util.Log;
 
 /**
