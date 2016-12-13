@@ -255,7 +255,7 @@ public class DAWare extends DataAtom implements IDAWare {
      */
     private final DAUniqueID itemID;
     /**
-     * Unique items have a name.
+     * Unique items have a actionName.
      */
     private final DAText name;
     /**

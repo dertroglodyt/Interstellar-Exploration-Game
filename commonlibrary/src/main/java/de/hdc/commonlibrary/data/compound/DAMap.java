@@ -24,7 +24,7 @@ import de.hdc.commonlibrary.data.IDataAtom;
 import de.hdc.commonlibrary.data.atom.DataAtom;
 
 /**
- * A dynamic length alphabetical ordered ware of properties (name, value pairs).
+ * A dynamic length alphabetical ordered ware of properties (actionName, value pairs).
  * Useful for simple INI-files.
  *
  * @author Martin

@@ -245,7 +245,7 @@ public final class DAWareTypeTreeBootstrap {
         final DAWareTypeTreeNode root = DAWareTypeTreeNode.create(null, DAText.create("Root node.")
                 , DAText.create("You should never see this!"));
         for (DefWaresTree dwf : DefWaresTree.values()) {
-//            System.out.println(dwf.name() + "###" + dwf.path);
+            System.out.println(dwf.name() + "###" + dwf.path);
             if (dwf.path.isEmpty()) {
                 root.addChild(DAWareTypeTreeNode.create(root, dwf.displayName, dwf.description, dwf.id));
             } else {
@@ -257,7 +257,7 @@ public final class DAWareTypeTreeBootstrap {
             }
         }
         for (DefWareClass t : DefWareClass.values()) {
-//            System.out.println(t.displayName);
+            System.out.println(t.displayName);
             DAWareTypeTreeNode parent = root.findWareClassType(t.typeID);
             parent.addWareClass(DAWareClass.create(t.fClassID, t.typeID, t.displayName));
         }

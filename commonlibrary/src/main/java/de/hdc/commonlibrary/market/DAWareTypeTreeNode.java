@@ -73,7 +73,7 @@ public class DAWareTypeTreeNode extends DataAtom {
 
     /**
      * Used by DAWareTypeTreeBootstrap.
-     * Gets first direct child of this node with given name.
+     * Gets first direct child of this node with given actionName.
      * @param name
      * @return
      */
@@ -116,12 +116,10 @@ public class DAWareTypeTreeNode extends DataAtom {
     }
 
     public DAWareTypeTreeNode findWareClassType(DAUniqueID wareClassID) {
-        for (DAWareClass wc : wareClasses) {
-            if (wc.id.compareTo(wareClassID) == 0) {
-                return this;
-            }
-        }
         for (DAWareTypeTreeNode tn : children) {
+            if (tn.getID().equals(wareClassID)) {
+                return tn;
+            }
             DAWareTypeTreeNode wc = tn.findWareClassType(wareClassID);
             if (wc != null) {
                 return wc;

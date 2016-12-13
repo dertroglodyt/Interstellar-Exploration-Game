@@ -47,17 +47,17 @@ public class DAShip extends DAModuleContainer {
 //        CAPTAINID(DAUniqueID.class),
 //        ;
 //
-//        private DAText name;
+//        private DAText actionName;
 //        private Class<?> c;
 //
 //        Parameters(Class<?> aClass) {
-//            name = new DAText(this.toString());
+//            actionName = new DAText(this.toString());
 //            c = aClass;
 //        }
 //
 //        @Override
 //        public DAText getName() {
-//            return name;
+//            return actionName;
 //        }
 //
 //        @Override
@@ -98,12 +98,12 @@ public class DAShip extends DAModuleContainer {
 //        SET_CAPTAIN(Parameters.NONE, Parameters.SHIPID, Parameters.CAPTAINID),
 //        ;
 //
-//        private DAText name;
+//        private DAText actionName;
 //        private ArrayList<IParameterType> input;
 //        private IParameterType result;
 //
 //        Action(IParameterType r, IParameterType... in) {
-//            name = new DAText(this.toString());
+//            actionName = new DAText(this.toString());
 //            input = new ArrayList<IParameterType>(in.length);
 //            input.addAll(Arrays.asList(in));
 //            result = r;
@@ -111,7 +111,7 @@ public class DAShip extends DAModuleContainer {
 //
 //        @Override
 //        public DAText getName() {
-//            return name;
+//            return actionName;
 //        }
 //
 //        @Override

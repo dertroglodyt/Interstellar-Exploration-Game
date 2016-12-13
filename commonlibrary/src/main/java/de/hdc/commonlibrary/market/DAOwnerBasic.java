@@ -35,7 +35,7 @@ public class DAOwnerBasic implements IDAOwner {
     public String toString() {
         return "DAOrganizationBasic{" +
                 "id=" + id +
-                ", name=" + name +
+                ", actionName=" + name +
                 '}';
     }
 

@@ -59,26 +59,26 @@ public class DATankClass extends DABasicModuleClass {
 //    }
 
 //    public DAbmTankClass(Size aSize
-//            , DALine name, DAText description, DAPVMass aMass, DAWareClass aStoreType, double aCapacity) {
-//        super(aSize, name, description, aMass, new DAPVEnergy(0, DAUnit.KnownUnit.J)
+//            , DALine actionName, DAText description, DAPVMass aMass, DAWareClass aStoreType, double aCapacity) {
+//        super(aSize, actionName, description, aMass, new DAPVEnergy(0, DAUnit.KnownUnit.J)
 //                , new DADoubleFloat(100), new DAGoodFlowList(), new DADamage());
 //        try {
 //            fCapacity = new DADoubleFloat(aCapacity, aStoreType.getUnit());
 //            setStoreType(aStoreType);
-//            setName(name);
+//            setName(actionName);
 //        } catch (Throwable t) {
 //            DVCErrorHandler.raiseError(DAResult.createSerious(t.getMessage(), "DABMTankClass()"));
 //        }
 //    }
 //
-//    private DAbmTankClass(String classIDStr, Size aSize, DALine name
+//    private DAbmTankClass(String classIDStr, Size aSize, DALine actionName
 //            , DAText description, DAPVMass aMass, DAWareClass aStoreType, double aCapacity) {
-//        super(classIDStr, aSize, name, description, aMass, new DAPVEnergy(0, DAUnit.KnownUnit.J)
+//        super(classIDStr, aSize, actionName, description, aMass, new DAPVEnergy(0, DAUnit.KnownUnit.J)
 //                , new DADoubleFloat(100), new DAGoodFlowList(), new DADamage());
 //        try {
 //            fCapacity = new DADoubleFloat(aCapacity, aStoreType.getUnit());
 //            setStoreType(aStoreType);
-//            setName(name);
+//            setName(actionName);
 //        } catch (Throwable t) {
 //            DVCErrorHandler.raiseError(DAResult.createSerious(t.getMessage(), "DABMTankClass(2)"));
 //        }

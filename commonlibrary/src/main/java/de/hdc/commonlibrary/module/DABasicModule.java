@@ -78,7 +78,7 @@ public abstract class DABasicModule extends DATickable implements IDAWare {
      */
     public final DAUniqueID itemID;
     /**
-     * Unique items have a name.
+     * Unique items have a actionName.
      */
     public final DAText itemName;
     /**
@@ -413,7 +413,7 @@ public abstract class DABasicModule extends DATickable implements IDAWare {
     }
 
 //    @Override
-//    public DAWare makeUnique(DAText name) {
+//    public DAWare makeUnique(DAText actionName) {
 //        throw new UnsupportedOperationException();
 //    }
 

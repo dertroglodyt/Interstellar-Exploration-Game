@@ -29,6 +29,81 @@ import static junit.framework.Assert.assertTrue;
 
 public class DAMarketTest {
     @Test
+    public void create() throws Exception {
+
+    }
+
+    @Test
+    public void create1() throws Exception {
+
+    }
+
+    @Test
+    public void toString1() throws Exception {
+
+    }
+
+    @Test
+    public void init() throws Exception {
+
+    }
+
+    @Test
+    public void addOrder1() throws Exception {
+
+    }
+
+    @Test
+    public void addOrders() throws Exception {
+
+    }
+
+    @Test
+    public void removeOrder() throws Exception {
+
+    }
+
+    @Test
+    public void removeOrders() throws Exception {
+
+    }
+
+    @Test
+    public void getBuying() throws Exception {
+
+    }
+
+    @Test
+    public void getSelling() throws Exception {
+
+    }
+
+    @Test
+    public void getBuying1() throws Exception {
+
+    }
+
+    @Test
+    public void getSelling1() throws Exception {
+
+    }
+
+    @Test
+    public void getBuying2() throws Exception {
+
+    }
+
+    @Test
+    public void getSelling2() throws Exception {
+
+    }
+
+    @Test
+    public void buy() throws Exception {
+
+    }
+
+    @Test
     public void addOrder() throws Exception {
 
     }
