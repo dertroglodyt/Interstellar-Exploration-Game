@@ -23,6 +23,10 @@ import de.hdc.commonlibrary.util.Log;
 @SuppressWarnings("serial")
 public class DAParameterList extends DataAtom {
 
+    public static DAParameterList create() {
+        return new DAParameterList(DAMap.create());
+    }
+
     @Deprecated
     public DAParameterList() {
         super();

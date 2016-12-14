@@ -5,12 +5,16 @@ import java.util.Collections;
 import java.util.List;
 
 import de.hdc.commonlibrary.data.IDataAtom;
+import de.hdc.commonlibrary.data.atom.DAArray;
 import de.hdc.commonlibrary.data.atom.DAText;
 import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.atom.DAVector;
 import de.hdc.commonlibrary.data.compound.DAResult;
+import de.hdc.commonlibrary.data.quantity.Pieces;
+import de.hdc.commonlibrary.module.DAStorage;
 import de.hdc.commonlibrary.module.DAWaresContainer;
+import de.hdc.commonlibrary.protocol.DAParameterList;
 import de.hdc.commonlibrary.protocol.DARemoteAction;
 import de.hdc.commonlibrary.protocol.IActionHandler;
 import de.hdc.commonlibrary.protocol.IParameterType;
@@ -24,8 +28,9 @@ import de.hdc.commonlibrary.protocol.IRemoteActionType;
 
 public class MarketHandler implements IActionHandler {
 
-    public MarketHandler(DAMarket market) {
+    public MarketHandler(DAMarket market, OrganisationMap userMap) {
         this.market = market;
+        this.userMap = userMap;
     }
 
     /**
@@ -119,22 +124,109 @@ public class MarketHandler implements IActionHandler {
     @Override
     public DARemoteAction handle(DARemoteAction action) {
         if (! action.parm.validate(Action.valueOf(action.actionName.toString()))) {
-            return DARemoteAction.create(action, DAResult.createFailed("MarketHandler.handle", "Action is invalid!" + action.toString()));
+            return DARemoteAction.create(action, DAResult.createFailed("Action is invalid!" + action.toString(), "MarketHandler.handle"));
         }
         if (action.destinationType != DARemoteAction.Type.MARKET) {
-            return DARemoteAction.create(action, DAResult.createFailed("MarketHandler.handle", "Action dest. type is not MARKET!" + action.toString()));
+            return DARemoteAction.create(action, DAResult.createFailed("Action dest. type is not MARKET!" + action.toString(), "MarketHandler.handle"));
         }
         if (action.destinationID != market.id) {
-            return DARemoteAction.create(action, DAResult.createFailed("MarketHandler.handle", "Action dest. is not this market!" + action.toString()));
+            return DARemoteAction.create(action, DAResult.createFailed("Action dest. is not this market!" + action.toString(), "MarketHandler.handle"));
         }
+        final DAParameterList pl = DAParameterList.create();
         switch (Action.valueOf(action.actionName.toString())) {
             case ADD_ORDERS: {
-                return DARemoteAction.create(action, DAResult.createFailed("MarketHandler.handle", "Not implemented yet!" + action.toString()));
+                DAArray<DAOrder> v = (DAArray<DAOrder>) action.parm.get(Parms.ORDERS);
+                market.addOrders(v);
+                return DARemoteAction.create(action, DAResult.createOK("Order(s) added.", "MarketHandler.handle", pl));
+            }
+            case REMOVE_ORDERS: {
+            @SuppressWarnings("unchecked")
+            DAArray<DAOrder> v = (DAArray<DAOrder>) action.parm.get(Parms.ORDERS);
+                market.removeOrders(v);
+                return DARemoteAction.create(action, DAResult.createOK("Removed order(s).", "MarketHandler.handle", pl));
+            }
+            case BUY: {
+                DAUniqueID stoID = (DAUniqueID) action.parm.get(Parms.STORAGEID);
+                DAStorage sto = (DAStorage) market.getStorage(stoID);
+                DAOrder so = (DAOrder) action.parm.get(Parms.ORDER);
+                DAValue<Pieces> amount = (DAValue<Pieces>) action.parm.get(Parms.AMOUNT);
+                DAUniqueID sid = (DAUniqueID) action.parm.get(Parms.SCRIPT_ID);
+                if (! sid.isValid()) { // special case because we can not transfer null values
+                    sid = null;
+                }
+                DAResult r = market.buy(sto, so, amount, sid, userMap);
+                return DARemoteAction.create(action, new DAResult<DAParameterList>(r.getMessage(),
+                        r.getResultType(), pl, "DVCosmClan.handle"));
+            }
+            case SELL: {
+                DAUniqueID stoID = (DAUniqueID) action.parm.get(Parms.STORAGEID);
+                DAStorage sto = (DAStorage) market.getStorage(stoID);
+                DAOrder bo = (DAOrder) action.parm.get(Parms.ORDER);
+            @SuppressWarnings("unchecked")
+                DAArray<DAWaresContainer> cont = (DAArray<DAWaresContainer>) action.parm.get(Parms.CONTAINERLIST);
+                DAUniqueID sid = (DAUniqueID) action.parm.get(Parms.SCRIPT_ID);
+                if (! sid.isValid()) { // special case because we can not transfer null values
+                    sid = null;
+                }
+                DAResult r = market.sell(sto, bo, cont, sid, userMap);
+                return DARemoteAction.create(action, new DAResult<DAParameterList>(r.getMessage(),
+                        r.getResultType(), pl, "DVCosmClan.handle"));
+            }
+            case GET_BUYING: {
+                DAArray<DAOrder> v = market.getBuying();
+                pl.add(Parms.ORDERS, v);
+                break;
+            }
+            case GET_SELLING: {
+                DAArray<DAOrder> v = market.getSelling();
+                pl.add(Parms.ORDERS, v);
+                break;
+            }
+            case GET_BUYING_W: {
+                DAWare w = (DAWare) action.parm.get(Parms.WARE);
+                DAArray<DAOrder> v = market.getBuying(w);
+                pl.add(Parms.ORDERS, v);
+                break;
+            }
+            case GET_SELLING_W: {
+                DAWare w = (DAWare) action.parm.get(Parms.WARE);
+                DAArray<DAOrder> v = market.getSelling(w);
+                pl.add(Parms.ORDERS, v);
+                break;
+            }
+//            case GET_BUYING_WT: {
+//                DAWaresType wt = (DAWaresType) action.parm.get(Parms.WARESTYPE);
+//                DAArray<DAOrder> v = market.getBuying(wt);
+//                pl.add(Parms.ORDERS, v);
+//                break;
+//            }
+//            case GET_SELLING_WT: {
+//                DAWaresType wt = (DAWaresType) action.parm.get(Parms.WARESTYPE);
+//                DAArray<DAOrder> v = market.getSelling(wt);
+//                pl.add(Parms.ORDERS, v);
+//                break;
+//            }
+////            case SPLIT: {
+////                DAUniqueID stoID = (DAUniqueID) action.parm.get(Parameters.STORAGEID);
+////                DAbmStorage sto = (DAbmStorage) getParentContainer().getModule(stoID);
+////                DAbmWaresContainer wc = (DAbmWaresContainer) action.parm.get(Parameters.CONTAINER);
+////                DAAmount a = (DAAmount) action.parm.get(Parameters.AMOUNT);
+////                DATypedResult<DAbmWaresContainer> r = split(sto, wc, a);
+////                pl.add(Parameters.CONTAINER, r.getResult());
+////                return new DATypedResult<DAParameterList>(r.getMessage(),
+////                        r.getResultType(), pl, "DVCosmClan.handle");
+////                //break;
+////            }
+            default: {
+                return DARemoteAction.create(action, DAResult.createFailed("Unknown action <" + action.toString() + ">!"
+                        , "MarketHandler.handle"));
             }
         }
-        return DARemoteAction.create(action, DAResult.createFailed("MarketHandler.handle", "Unknown error!" + action.toString()));
+        return DARemoteAction.create(action, DAResult.createOK("Handled action " + action.toString()
+                , "MarketHandler.handle", pl));
     }
 
     private final DAMarket market;
+    private final OrganisationMap userMap;
 
 }
