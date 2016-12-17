@@ -12,60 +12,52 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import de.hdc.commonlibrary.data.IDataAtom;
 import de.hdc.commonlibrary.data.atom.DAArray;
-import de.hdc.commonlibrary.data.atom.DAText;
-import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.compound.DAResult;
 import de.hdc.commonlibrary.data.quantity.NewUnits;
 import de.hdc.commonlibrary.util.Log;
 
-public class DAOwnerBasic implements IDAOwner {
+public class DAWallet implements IDataAtom {
 
-    public final DAUniqueID id;
-    public final DAText name;
     private DAValue<Money> wallet;
     private final DAArray<DAMarketTransaction> transactionLog;
 
-    public static DAOwnerBasic create(DAUniqueID id, DAText name) {
-        return new DAOwnerBasic(id, name);
+    public static DAWallet create() {
+        return new DAWallet();
+    }
+
+    @Deprecated
+    public DAWallet() {
+        super();
+        this.wallet = DAValue.create(0, NewUnits.CREDITS);
+        this.transactionLog = DAArray.create();
     }
 
     @Override
     public String toString() {
-        return "DAOrganizationBasic{" +
-                "id=" + id +
-                ", actionName=" + name +
-                '}';
+        return "Wallet: " + wallet.toString();
     }
 
-    @Override
-    public DAUniqueID getId() {
-        return id;
-    }
-
-    @Override
-    public DAText getName() {
-        return name;
-    }
-
-    @Override
     public DAResult<IDAWare> transaction(DAMarketTransaction mt) {
-        synchronized(id) {
+        synchronized(transactionLog) {
             StackTraceElement[] ste = Thread.currentThread().getStackTrace();
-            if ((! ste[2].getClassName().contentEquals("datavault.common.space.model.market.DAMarket"))
-                    && (! ste[2].getClassName().contentEquals("datavault.common.space.model.DAClan"))
-                    && (! ste[2].getClassName().contentEquals("datavault.common.space.editor.DVCseClan"))
-                    && (! ste[2].getClassName().contentEquals("datavault.common.space.model.market.module.DABMRentableStorage"))
-                    && (! ste[2].getClassName().contentEquals("datavault.common.space.model.market.module.DABMHangar"))
+            if ((ste[2].getClassName().contentEquals("datavault.common.space.model.market.DAMarket"))
+                    || (ste[2].getClassName().contentEquals("datavault.common.space.model.DAClan"))
+                    || (ste[2].getClassName().contentEquals("datavault.common.space.editor.DVCseClan"))
+                    || (ste[2].getClassName().contentEquals("datavault.common.space.model.market.module.DABMRentableStorage"))
+                    || (ste[2].getClassName().contentEquals("datavault.common.space.model.market.module.DABMHangar"))
                     ) {
-                Log.warn(DAOwnerBasic.class, "transaction: DAClan.transaction() was invoked by "
-                        + ste[2].getClassName() + " Line: " + ste[2].getLineNumber() + " which is forbidden!");
-                return DAResult.createWarning("Invocation allowed only by DAMarket!", "DAClan.transaction");
+                // everything is ok
+            } else {
+                    Log.warn(DAWallet.class, "transaction: DAClan.transaction() was invoked by "
+                            + ste[2].getClassName() + " Line: " + ste[2].getLineNumber() + " which is forbidden!");
+                    return DAResult.createWarning("Invocation allowed only by DAMarket!", "DAClan.transaction");
             }
-            if ((mt.sourceID.compareTo(id) != 0) && (mt.targetID.compareTo(id) != 0)) {
-                return DAResult.createFailed("We are neither source nor target of this transaction...!?", "DAClan.transaction");
-            }
+//            if ((mt.sourceID.compareTo(id) != 0) && (mt.targetID.compareTo(id) != 0)) {
+//                return DAResult.createFailed("We are neither source nor target of this transaction...!?", "DAClan.transaction");
+//            }
             try {
                 DAResult<IDAWare> r;
                 switch (mt.type) {
@@ -100,21 +92,21 @@ public class DAOwnerBasic implements IDAOwner {
         }
     }
 
-    @Override
     public void undoTransaction(DAMarketTransaction mt) {
-        synchronized(id) {
+        synchronized(transactionLog) {
             StackTraceElement[] ste = Thread.currentThread().getStackTrace();
             if ((ste[2].getClassName().contentEquals("datavault.common.space.model.market.DAMarket"))
                     || (ste[2].getClassName().contentEquals("datavault.common.space.model.DAClan"))
                     || (ste[2].getClassName().contentEquals("datavault.common.space.editor.DVCseClan"))) {
+                // everything is ok
             } else {
-                Log.warn(DAOwnerBasic.class, "undoTransaction: DAClan.undoTransaction() was invoked by "
+                Log.warn(DAWallet.class, "undoTransaction: DAClan.undoTransaction() was invoked by "
                 + ste[2].getClassName() + " Line: " + ste[2].getLineNumber() + " which is forbidden!");
     }
-            if ((mt.sourceID.compareTo(id) != 0) && (mt.targetID.compareTo(id) != 0)) {
-                Log.warn(DAOwnerBasic.class, "undoTransaction: We are neither source nor target of this transaction...!?");
-                return ;
-            }
+//            if ((mt.sourceID.compareTo(id) != 0) && (mt.targetID.compareTo(id) != 0)) {
+//                Log.warn(DAWallet.class, "undoTransaction: We are neither source nor target of this transaction...!?");
+//                return ;
+//            }
             switch (mt.type) {
                 case TAX_FROM:
                 case DONATION_FROM:
@@ -147,29 +139,27 @@ public class DAOwnerBasic implements IDAOwner {
     @Override
     public void toStream(DataOutputStream stream) throws IOException {
         stream.writeByte(VERSION);
-        id.toStream(stream);
-        name.toStream(stream);
+        wallet.toStream(stream);
+        transactionLog.toStream(stream);
     }
 
     @Override
-    public DAOwnerBasic fromStream(DataInputStream stream) throws IOException {
+    public DAWallet fromStream(DataInputStream stream) throws IOException {
         final byte v = stream.readByte();
         if (v < 1) {
             throw new IllegalArgumentException("Invalid version number " + v);
         }
-        DAUniqueID aid = new DAUniqueID().fromStream(stream);
-        DAText aname = new DAText().fromStream(stream);
-        return new DAOwnerBasic(aid, aname);
+        DAValue<Money> awallet = new DAValue<Money>().fromStream(stream);
+        DAArray<DAMarketTransaction> alog = new DAArray<DAMarketTransaction>().fromStream(stream);
+        return new DAWallet(awallet, alog);
     }
 
     private static final byte VERSION = 1;
 
-    private DAOwnerBasic(DAUniqueID id, DAText name) {
+    private DAWallet(DAValue<Money> wallet, DAArray<DAMarketTransaction> log) {
         super();
-        this.id = id;
-        this.name = name;
-        this.wallet = DAValue.<Money>create(0, NewUnits.CREDITS);
-        this.transactionLog = DAArray.create();
+        this.wallet = wallet;
+        this.transactionLog = log;
     }
 
 }

@@ -9,17 +9,17 @@ package de.hdc.commonlibrary.market;
 import de.hdc.commonlibrary.data.IDataAtom;
 import de.hdc.commonlibrary.data.atom.DAText;
 import de.hdc.commonlibrary.data.atom.DAUniqueID;
-import de.hdc.commonlibrary.data.compound.DAResult;
 
-public interface IDAOwner extends IDataAtom {
+public interface IDASubject extends IDataAtom {
 
-    public DAUniqueID getId();
+    enum Type {
+        AI, NPC, PLAYER, ORGANISATION
+    }
 
-    public DAText getName();
+    DAUniqueID getId();
 
-    public DAResult<IDAWare> transaction(DAMarketTransaction mt);
+    DAText getName();
 
-    public void undoTransaction(DAMarketTransaction mt);
-
+    Type getType();
 
 }

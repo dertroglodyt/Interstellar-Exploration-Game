@@ -1,4 +1,4 @@
-package de.hdc.commonlibrary.market;
+package de.hdc.commonlibrary.data.world;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,6 +12,10 @@ import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.atom.DAVector;
 import de.hdc.commonlibrary.data.compound.DAResult;
 import de.hdc.commonlibrary.data.quantity.Pieces;
+import de.hdc.commonlibrary.market.DAMarket;
+import de.hdc.commonlibrary.market.DAOrder;
+import de.hdc.commonlibrary.market.DAWare;
+import de.hdc.commonlibrary.market.DAWareTypeTreeNode;
 import de.hdc.commonlibrary.module.DAStorage;
 import de.hdc.commonlibrary.module.DAWaresContainer;
 import de.hdc.commonlibrary.protocol.DAParameterList;
@@ -28,7 +32,7 @@ import de.hdc.commonlibrary.protocol.IRemoteActionType;
 
 public class MarketHandler implements IActionHandler {
 
-    public MarketHandler(DAMarket market, OrganisationMap userMap) {
+    public MarketHandler(DAMarket market, DASubjectMap userMap) {
         this.market = market;
         this.userMap = userMap;
     }
@@ -227,6 +231,6 @@ public class MarketHandler implements IActionHandler {
     }
 
     private final DAMarket market;
-    private final OrganisationMap userMap;
+    private final DASubjectMap userMap;
 
 }

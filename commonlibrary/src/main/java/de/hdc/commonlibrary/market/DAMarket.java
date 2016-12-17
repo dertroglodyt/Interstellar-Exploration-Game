@@ -28,6 +28,7 @@ import de.hdc.commonlibrary.data.atom.DataAtom;
 import de.hdc.commonlibrary.data.compound.DAResult;
 import de.hdc.commonlibrary.data.quantity.NewUnits;
 import de.hdc.commonlibrary.data.quantity.Pieces;
+import de.hdc.commonlibrary.data.world.DASubjectMap;
 import de.hdc.commonlibrary.module.DABasicModule;
 import de.hdc.commonlibrary.module.DAModuleContainer;
 import de.hdc.commonlibrary.module.DAShip;
@@ -228,7 +229,7 @@ public class DAMarket extends DataAtom {
      * @return
      */
     public DAResult<IDAWare> buy(DAStorage targetStorage, DAOrder so, DAValue<Pieces> amount
-            , DAUniqueID scriptID, OrganisationMap userMap) {
+            , DAUniqueID scriptID, DASubjectMap userMap) {
         synchronized (orders) {
             if (so == null) {
                 return DAResult.createWarning("Order is NULL!.", "DAMarket.buy");
@@ -269,7 +270,7 @@ public class DAMarket extends DataAtom {
                 if (!rf.isOK()) {
                     return DAResult.createFailed(rf.getMessage(), "DAMarket.buy");
                 }
-                IDAOwner buyer = userMap.getOrganisation(targetStorage.getLeaserID());
+                DAOwner buyer = userMap.get(targetStorage.getLeaserID());
                 if (buyer == null) {
                     return DAResult.createWarning("No valid buyer found in WorldNode.", "DAMarket.buy");
                 }
@@ -277,7 +278,7 @@ public class DAMarket extends DataAtom {
                 if (sto == null) {
                     return DAResult.createWarning("Order source storage not found in ship.", "DAMarket.buy");
                 }
-                IDAOwner owner = userMap.getOrganisation(sto.getLeaserID());
+                DAOwner owner = userMap.get(sto.getLeaserID());
                 if (owner == null) {
                     return DAResult.createWarning("No valid order owner found in WorldNode.", "DAMarket.buy");
                 }
@@ -341,7 +342,7 @@ public class DAMarket extends DataAtom {
      * @return
      */
     public DAResult sell(DAStorage sourceStorage, DAOrder bo, DAArray<DAWaresContainer> contis
-            , DAUniqueID scriptID, OrganisationMap userMap) {
+            , DAUniqueID scriptID, DASubjectMap userMap) {
         synchronized (orders) {
             if (bo == null) {
                 return DAResult.createWarning("Order is NULL!.", "DAMarket.sell");
@@ -398,11 +399,11 @@ public class DAMarket extends DataAtom {
                 if (!rf.isOK()) {
                     return DAResult.createFailed("Not enough space in destination storage.", "DAMarket.sell");
                 }
-                IDAOwner seller = userMap.getOrganisation(sourceStorage.getLeaserID());
+                DAOwner seller = userMap.get(sourceStorage.getLeaserID());
                 if (seller == null) {
                     return DAResult.createWarning("No valid seller found in WorldNode.", "DAMarket.sell");
                 }
-                IDAOwner owner = userMap.getOrganisation(sto.getLeaserID());
+                DAOwner owner = userMap.get(sto.getLeaserID());
                 if (owner == null) {
                     return DAResult.createWarning("No valid order owner found in WorldNode.", "DAMarket.sell");
                 }

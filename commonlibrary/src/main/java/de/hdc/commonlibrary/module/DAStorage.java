@@ -31,7 +31,7 @@ import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.compound.DAResult;
 import de.hdc.commonlibrary.data.quantity.Pieces;
-import de.hdc.commonlibrary.market.DAOwnerBasic;
+import de.hdc.commonlibrary.market.DAOwner;
 import de.hdc.commonlibrary.market.DAWare;
 import de.hdc.commonlibrary.market.DAWareClass;
 import de.hdc.commonlibrary.market.DAWareTypeTree;
@@ -52,7 +52,7 @@ public class DAStorage extends DABasicModule {
     private DAArray<DALogItem<DAWaresContainer>> container;
     private DAUniqueID leaserID;
 
-    private transient DAOwnerBasic leasert;
+    private transient DAOwner leasert;
 
     @Deprecated
     public DAStorage() {
