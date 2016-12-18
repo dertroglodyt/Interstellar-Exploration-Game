@@ -270,7 +270,7 @@ public class DAMarket extends DataAtom {
                 if (!rf.isOK()) {
                     return DAResult.createFailed(rf.getMessage(), "DAMarket.buy");
                 }
-                DAOwner buyer = userMap.get(targetStorage.getLeaserID());
+                DAOwner buyer = (DAOwner) userMap.get(targetStorage.getLeaserID());
                 if (buyer == null) {
                     return DAResult.createWarning("No valid buyer found in WorldNode.", "DAMarket.buy");
                 }
@@ -278,7 +278,7 @@ public class DAMarket extends DataAtom {
                 if (sto == null) {
                     return DAResult.createWarning("Order source storage not found in ship.", "DAMarket.buy");
                 }
-                DAOwner owner = userMap.get(sto.getLeaserID());
+                DAOwner owner = (DAOwner) userMap.get(sto.getLeaserID());
                 if (owner == null) {
                     return DAResult.createWarning("No valid order owner found in WorldNode.", "DAMarket.buy");
                 }
@@ -399,11 +399,11 @@ public class DAMarket extends DataAtom {
                 if (!rf.isOK()) {
                     return DAResult.createFailed("Not enough space in destination storage.", "DAMarket.sell");
                 }
-                DAOwner seller = userMap.get(sourceStorage.getLeaserID());
+                DAOwner seller = (DAOwner) userMap.get(sourceStorage.getLeaserID());
                 if (seller == null) {
                     return DAResult.createWarning("No valid seller found in WorldNode.", "DAMarket.sell");
                 }
-                DAOwner owner = userMap.get(sto.getLeaserID());
+                DAOwner owner = (DAOwner) userMap.get(sto.getLeaserID());
                 if (owner == null) {
                     return DAResult.createWarning("No valid order owner found in WorldNode.", "DAMarket.sell");
                 }

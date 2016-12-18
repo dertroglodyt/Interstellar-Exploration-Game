@@ -61,7 +61,7 @@ public class DADateTime extends DataAtom {
     @Override
     public String toString() {
         if (date != NEVER.asJulianDate()) {
-            return asJulianDate().toString();
+            return asDINDate();
         } else {
             return NEVER_STR;
         }
@@ -75,40 +75,52 @@ public class DADateTime extends DataAtom {
         return this.date.compareTo(((DADateTime)o).date);
     }
 
-    //todo result is plain wrong
-    public String asDate() {
-        final double jd = date.doubleValue(NonSI.DAY);
-        final long z = (long) Math.floor(jd + 0.5);
-        final double f = (jd + 0.5) - (double) z;
+    public String asDINDate() {
+        final double jd = date.doubleValue(NonSI.DAY) + 0.5;
+        final long z = (long) Math.floor(jd);
+        double f = jd - z;
         long a = 0;
         if (z < 2299161L) {
             a = z;
         } else {
             long g = (long) Math.floor((z - 1867216.25) / 36524.25);
-            a = z + 1 + g - (long) Math.floor(g/4.0);
+            a = z + 1 + g - (long) Math.floor(g/4);
         }
         long b = a + 1524;
         long c = (long) Math.floor((b-122.1) / 365.25);
         long d = (long) Math.floor(365.25 * c);
         long e = (long) Math.floor((b-d) / 30.6001);
-        long day = b - d - (long) (Math.floor(30.6001 * e) + f);
+        long day = b - d - (long) (Math.floor(30.6001 * e));
         long month = ((e < 14L) ? e - 1L : e - 13L);
         long year = ((month > 2L) ? c - 4716L : c - 4715L);
 
-        return year + "-" + ((month < 10L) ? "0" + month : month)
-                + '-' + ((day < 10L) ? "0" + day : day);
-    }
+        double x;
+        int[] r = new int[4];
+        for (int i = 0; i < 4; i++) {
+            switch(i) {
+                case 0:
+                    f = f * 24.0;
+                    break;
+                case 1:
+                case 2:
+                    f = f * 60.0;
+                    break;
+                case 3:
+                    f = f * 1000.0;
+                    break;
+            }
+            x = Math.floor(f);
+            r[i] = (int) x;
+            f = f - x;
+        }
 
-    public String asTime() {
-        long sec = getSecondsOfDay();
-        long s = (long) Math.floor(sec % 60);
-        long m = (long) Math.floor(sec / 60 % 60);
-        long h = (long) Math.floor(sec / 3600 % 24);
-
-        String r = ((h < 10) ? "0" + h : h) + ":"
-                + ((m < 10) ? "0" + m : m) + ":"
-                + ((s < 10) ? "0" + s : m);
-        return r;
+        return year
+                + "-" + ((month < 10L) ? "0" + month : month)
+                + '-' + ((day < 10L) ? "0" + day : day)
+                + "T" + ((r[0] < 10L) ? "0" + r[0] : r[0])
+                + ":" + ((r[1] < 10L) ? "0" + r[1] : r[1])
+                + ":" + ((r[2] < 10L) ? "0" + r[2] : r[2])
+                + "." + ((r[3] < 10L) ? "0" + r[3] : r[3]);
     }
 
     public DAValue<Duration> asJulianDate() {
