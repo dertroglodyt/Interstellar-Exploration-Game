@@ -20,7 +20,7 @@ public class LoggingTest {
     public static void main(String[] args) throws IOException, InterruptedException {
         Socket socket = new Socket("127.0.0.1", 8080);
         DataOutputStream os = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-        DALogEntry entry = DALogEntry.create(DADateTime.now(), DALogEntry.Level.INFO, DAText.create("Ein Test."));
+        DALogEntry entry = DALogEntry.create(DADateTime.now(), DALogEntry.Level.INFO, DAText.create("Huge data count Test."));
         for (int i=0; i < 100000; i++) {
             entry.toStream(os);
         }
@@ -30,7 +30,7 @@ public class LoggingTest {
 
         socket = new Socket("127.0.0.1", 8080);
         os = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-        entry = DALogEntry.create(DADateTime.now(), DALogEntry.Level.INFO, DAText.create("Ein zweiter Test."));
+        entry = DALogEntry.create(DADateTime.now(), DALogEntry.Level.INFO, DAText.create("Pause Test."));
         for (int i=0; i < 5; i++) {
             entry.toStream(os);
         }
@@ -38,6 +38,17 @@ public class LoggingTest {
         for (int i=0; i < 5; i++) {
             entry.toStream(os);
         }
+        os.flush();
+        os.close();
+
+        socket = new Socket("127.0.0.1", 8080);
+        os = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+        entry = DALogEntry.create(DADateTime.now(), DALogEntry.Level.INFO, DAText.create("Ivalid data Test."));
+        for (int i=0; i < 5; i++) {
+            entry.toStream(os);
+        }
+        os.writeUTF("Invalid data!");
+        entry.toStream(os);
         os.flush();
         os.close();
     }

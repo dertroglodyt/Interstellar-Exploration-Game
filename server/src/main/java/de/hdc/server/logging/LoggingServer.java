@@ -85,7 +85,9 @@ public class LoggingServer {
     private final PrintWriter log;
 
     private void log(DALogEntry entry) {
-        log.println(entry.time.toString() + "|" + entry.level + "|" + entry.message);
+        synchronized (log) {
+            log.println(entry.time.toString() + "|" + entry.level + "|" + entry.message);
+        }
     }
 
     private class Connection implements Runnable {
