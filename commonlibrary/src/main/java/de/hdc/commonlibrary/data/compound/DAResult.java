@@ -288,7 +288,6 @@ public class DAResult<T extends IDataAtom> extends DataAtom {
         if (v < 1) {
             throw new IllegalArgumentException("Invalid version number " + v);
         }
-        // todo
         throw new RuntimeException("Not implemented");
     }
 

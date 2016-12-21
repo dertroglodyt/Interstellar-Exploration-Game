@@ -46,11 +46,17 @@ public class DAIntegerTest {
         i = DAInteger.create(-312, SI.METER);
         assertTrue(i.toString(), "-312 m".equals(i.toString()));
 
-        i = DAInteger.create("12,3 m");
-        assertTrue(i.toString(), "12 m".equals(i.toString()));
+        try {
+            i = DAInteger.create("12,3 m");
+            assertTrue(false);
+        } catch (NumberFormatException e) {
+        }
 
-        i = DAInteger.create("-312,9 m");
-        assertTrue(i.toString(), "-312 m".equals(i.toString()));
+        try {
+            i = DAInteger.create("-312,9 m");
+            assertTrue(false);
+        } catch (NumberFormatException e) {
+        }
     }
 
     @Test
@@ -98,7 +104,7 @@ public class DAIntegerTest {
     @Test
     public void to() throws Exception {
         DAInteger<Length> i = DAInteger.create(BigDecimal.valueOf(12000.3), SI.METER);
-        assertTrue(i.doubleValueBase()+"", "1200000 cm".equals(i.to(SI.CENTIMETER).toString()));
+        assertTrue(i.doubleValueBase()+"", "1.200.000 cm".equals(i.to(SI.CENTIMETER).toString()));
 
         i = DAInteger.create(BigDecimal.valueOf(12000), SI.METER);
         assertTrue(i.to(SI.KILO(SI.METER)).toString(), "12 km".equals(i.to(SI.KILO(SI.METER)).toString()));
@@ -109,7 +115,7 @@ public class DAIntegerTest {
         DAInteger<Length> i = DAInteger.create(BigDecimal.valueOf(4.3), SI.METER);
         assertTrue(i.inverse().doubleValueBase()+"", 0.25 == i.inverse().doubleValueBase());
         assertTrue(SI.METER.inverse().equals(i.inverse().getUnit()));
-        assertTrue(i.inverse().toString()+"", "0,25 1/m".equals(i.inverse().toString()));
+        assertTrue(i.inverse().toString()+"", "0,25 m^-1".equals(i.inverse().toString()));
     }
 
     @Test
@@ -142,9 +148,9 @@ public class DAIntegerTest {
         DAInteger<Length> i1 = DAInteger.create(BigDecimal.valueOf(4.3), SI.METER);
         DAInteger<Length> i2 = DAInteger.create(BigDecimal.valueOf(8.9), SI.METER);
         assertTrue(i1.mul(i2).getUnit().toString(), SI.SQUARE_METRE.equals(i1.mul(i2).getUnit()));
-        assertTrue(i1.mul(i2).toString(), "32 m²".equals(i1.mul(i2).toString()));
+        assertTrue(i1.mul(i2).toString(), "32 m^2".equals(i1.mul(i2).toString()));
 
-        assertTrue(i2.sub(i1).toString(), "32 m²".equals(i2.mul(i1).toString()));
+        assertTrue(i2.sub(i1).toString(), "32 m^2".equals(i2.mul(i1).toString()));
     }
 
     @Test

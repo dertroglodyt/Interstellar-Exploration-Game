@@ -20,10 +20,14 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import javax.measure.DecimalMeasure;
+import javax.measure.MeasureFormat;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
+import javax.measure.unit.UnitFormat;
 
 import de.hdc.commonlibrary.data.IDataAtom;
 
@@ -51,23 +55,11 @@ public class DAInteger<Q extends Quantity> extends DataAtom {
     }
 
     public static <T extends Quantity> DAInteger<T> create(String value) {
-        //todo nötig?
-        final String v = value.replace("[", "")
-                .replace("]", "")
-                .replace(".", "")
-                .replace(",", ".")
-                .replace("1/", " /");
-//        final int x = v.indexOf(' ');
-//        if (x > 0) {
-//            final BigDecimal bd = new BigDecimal(v.substring(0, x), MC);
-//            Unit u = Unit.valueOf(v.substring(x + 1));
-//            this.value = DecimalMeasure.valueOf(bd, (Unit<Q>) u);
-//        } else {
-//            final BigDecimal bd = new BigDecimal(v.substring(0, x), MC);
-//            this.value = DecimalMeasure.valueOf(bd, (Unit<Q>) Dimensionless.UNIT);
-//        }
-        final DecimalMeasure<T> dm = DecimalMeasure.valueOf(v);
-        return new DAInteger<>(dm);
+        String v = value.trim().replace(".", "").replace(',', '.') + " ";
+        final int x = v.indexOf(' ');
+        final BigInteger bd = new BigInteger(v.substring(0, x));
+        final Unit<T> u = (Unit<T>) Unit.valueOf(v.substring(x + 1));
+        return new DAInteger<T>(bd, u);
     }
 
     @Deprecated
@@ -91,7 +83,7 @@ public class DAInteger<Q extends Quantity> extends DataAtom {
 
     @Override
     public String toString() {
-        return value.toString().replace('.', ',').replace(" /", "1/").trim();
+        return MEASURE_FORMAT.format(value).trim();
     }
 
     public String getValueString() {
@@ -199,11 +191,16 @@ public class DAInteger<Q extends Quantity> extends DataAtom {
         if (v < 1) {
             throw new IllegalArgumentException("Invalid version number " + v);
         }
-        return create(stream.readUTF());
+        DAInteger<Q> i = null;
+        i = create(stream.readUTF());
+        return i;
     }
 
     private static final byte VERSION = 1;
     private static final MathContext MC = new MathContext(30, RoundingMode.HALF_EVEN);
+    private static final MeasureFormat MEASURE_FORMAT = MeasureFormat.getInstance(
+            NumberFormat.getNumberInstance(Locale.GERMANY)
+            , UnitFormat.getUCUMInstance());
 
     private final DecimalMeasure<Q> value;
 

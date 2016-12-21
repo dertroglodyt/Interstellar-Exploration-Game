@@ -6,7 +6,7 @@
 
 /*
  * DADateTime.java
- * TODO: Unschön!
+ * TODO: Unschön! Neue java date und time klassen verwenden?
  * Created on 6. Mai 2005, 04:10
  */
 package de.hdc.commonlibrary.data.atom;
@@ -22,7 +22,6 @@ import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
 
 import de.hdc.commonlibrary.data.IDataAtom;
-//todo Neue java date und time klassen verwenden?
 /**
  * Holds a point in time in form of it's julian date.
  *
@@ -210,7 +209,7 @@ public class DADateTime extends DataAtom {
 
     private static final byte VERSION = 1;
     private static final String NEVER_STR = "<NEVER>";
-    private static final DADateTime NEVER = DADateTime.create(DAValue.<Duration>create("-1"));
+    private static final DADateTime NEVER = DADateTime.create(DAValue.create("-1"));
     private static final DAValue<Duration> JD_1970_1_1 = DAValue.create("2440587.5 [day]");
 
     private final DAValue<Duration> date;

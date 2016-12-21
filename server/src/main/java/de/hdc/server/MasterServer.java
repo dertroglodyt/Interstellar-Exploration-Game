@@ -179,8 +179,6 @@ public class MasterServer implements Runnable {
                 break;
             }
             case GET_LOG_SERVER: {
-                // todo
-//                logServer.toStream(out);
                 DAParameterList plr = DAParameterList.create();
                 plr.add(DAServerMessage.Parms.SENDER_IP, pl.get(DAServerMessage.Parms.SENDER_IP));
                 plr.add(DAServerMessage.Parms.DEST_IP, logServer);

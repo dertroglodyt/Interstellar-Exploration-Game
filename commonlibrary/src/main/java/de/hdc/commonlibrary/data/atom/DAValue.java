@@ -19,11 +19,16 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import javax.measure.DecimalMeasure;
+import javax.measure.MeasureFormat;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Quantity;
+import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
+import javax.measure.unit.UnitFormat;
 
 import de.hdc.commonlibrary.data.IDataAtom;
 
@@ -50,22 +55,11 @@ public class DAValue<Q extends Quantity> extends DataAtom {
     }
 
     public static <T extends Quantity> DAValue<T> create(String value) {
-        // todo nötig?
-        final String v = value.replace("[", "")
-                .replace("]", "")
-//                .replace(".", "")
-//                .replace(",", ".")
-                .replace("1/", " /");
-//        final int x = v.indexOf(' ');
-//        if (x > 0) {
-//            final BigDecimal bd = new BigDecimal(v.substring(0, x), MC);
-//            Unit u = Unit.valueOf(v.substring(x + 1));
-//            this.value = DecimalMeasure.valueOf(bd, (Unit<Q>) u);
-//        } else {
-//            final BigDecimal bd = new BigDecimal(v.substring(0, x), MC);
-//            this.value = DecimalMeasure.valueOf(bd, (Unit<Q>) Dimensionless.UNIT);
-//        }
-        return new DAValue<T>(DecimalMeasure.valueOf(v));
+        String v = value.trim().replace(".", "").replace(',', '.') + " ";
+        final int x = v.indexOf(' ');
+        final BigDecimal bd = new BigDecimal(v.substring(0, x));
+        final Unit<T> u = (Unit<T>) Unit.valueOf(v.substring(x + 1));
+        return new DAValue<T>(bd, u);
     }
 
     @Override
@@ -83,8 +77,9 @@ public class DAValue<Q extends Quantity> extends DataAtom {
 
     @Override
     public String toString() {
-        return value.toString();
-//        return value.toString().replace('.', ',').replace(" /", "1/").trim();
+        return MEASURE_FORMAT.format(value).trim();
+//        return value.toString();
+////        return value.toString().replace('.', ',').replace(" /", "1/").trim();
     }
 
     public String getValueString() {
@@ -174,9 +169,14 @@ public class DAValue<Q extends Quantity> extends DataAtom {
         return new DAValue<>(bd, getUnit().times(getUnit()));
     }
 
-    // todo not exactly correct unit
+    /**
+     * not exactly correct unit!
+     */
     public DAValue<? extends Quantity> sqrt() {
         final BigDecimal bd = value.getValue().pow(-2, MC);
+        if (value.getUnit() == SI.SQUARE_METRE) {
+            return new DAValue<>(bd, SI.METER);
+        }
         return new DAValue<>(bd, Dimensionless.UNIT);
     }
 
@@ -241,6 +241,9 @@ public class DAValue<Q extends Quantity> extends DataAtom {
 
     private static final byte VERSION = 1;
     private static final MathContext MC = new MathContext(30, RoundingMode.HALF_EVEN);
+    private static final MeasureFormat MEASURE_FORMAT = MeasureFormat.getInstance(
+            NumberFormat.getNumberInstance(Locale.GERMANY)
+            , UnitFormat.getUCUMInstance());
 
     private final DecimalMeasure<Q> value;
 

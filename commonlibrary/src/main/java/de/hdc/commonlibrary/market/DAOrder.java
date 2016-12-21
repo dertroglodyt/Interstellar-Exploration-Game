@@ -27,7 +27,10 @@ import de.hdc.commonlibrary.data.atom.DAUniqueID;
 import de.hdc.commonlibrary.data.atom.DAValue;
 import de.hdc.commonlibrary.data.atom.DataAtom;
 import de.hdc.commonlibrary.data.quantity.Pieces;
+import de.hdc.commonlibrary.module.DAModuleContainer;
 import de.hdc.commonlibrary.util.Log;
+
+import static de.hdc.commonlibrary.data.quantity.NewUnits.PIECES;
 
 /**
  *

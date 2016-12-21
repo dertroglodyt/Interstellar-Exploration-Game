@@ -30,7 +30,6 @@ public class DARemoteAction extends DataAtom {
         ;
     }
 
-    // TODO: Sender definieren...
     public final Type senderType;
     public final DAUniqueID senderID;
     public final Type destinationType;
