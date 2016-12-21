@@ -110,7 +110,7 @@ public class Log {
 //        LogMF.fatal(Logger.getLogger(clazz), message, arguments);
     }
 
-    private static ConcurrentHashMap<Class<?>, Logger> pool  = new ConcurrentHashMap<Class<?>, Logger>(0);
+    private static ConcurrentHashMap<Class<?>, Logger> pool  = new ConcurrentHashMap<>(0);
 
     private Log() {
         // no instance

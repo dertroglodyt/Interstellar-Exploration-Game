@@ -16,8 +16,8 @@ import java.io.DataOutputStream;
 import javax.measure.quantity.Duration;
 import javax.measure.unit.NonSI;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -51,7 +51,6 @@ public class DADateTimeTest {
     @Test
     public void asDate() {
         DADateTime r = DADateTime.create(DAValue.<Duration>create(2457672.78681, NonSI.DAY));
-        assertEquals("2016-10-11", r.asDate());
-        assertEquals("06:53:00", r.asTime());
+        assertEquals("2016-10-11T06:53:00", r.asDINDate());
     }
 }

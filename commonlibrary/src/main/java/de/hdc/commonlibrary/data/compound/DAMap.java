@@ -107,6 +107,7 @@ public class DAMap<Q extends IDataAtom, T extends IDataAtom> extends DataAtom {
     @Override
     public void toStream(DataOutputStream stream) throws IOException {
         stream.writeByte(VERSION);
+
         stream.writeInt(table.size());
         if (table.size() > 0) {
             stream.writeUTF(table.firstEntry().getKey().getClass().getName());
@@ -124,7 +125,7 @@ public class DAMap<Q extends IDataAtom, T extends IDataAtom> extends DataAtom {
         if (v < 1) {
             throw new IllegalArgumentException("Invalid version number " + v);
         }
-        final DAMap<Q, T> t = new DAMap();
+        final DAMap<Q, T> t = DAMap.create();
         final int x = stream.readInt();
         Class ck = null;
         Class cv = null;

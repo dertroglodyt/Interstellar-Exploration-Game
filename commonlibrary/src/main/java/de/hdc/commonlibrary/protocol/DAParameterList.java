@@ -35,7 +35,7 @@ public class DAParameterList extends DataAtom {
 
     @Override
     public String toString() {
-        return parms.toString();
+        return ((parms != null) ? parms.toString() : "NULL");
     }
 
     public void add(IParameterType type, IDataAtom data) {
@@ -94,10 +94,9 @@ public class DAParameterList extends DataAtom {
             throw new IllegalArgumentException("Invalid version number " + v);
         }
 
-        DAMap<DAText, IDataAtom> aparm = new DAMap<>();
-        aparm.fromStream(stream);
+        DAMap<DAText, IDataAtom> aparm = new DAMap<DAText, IDataAtom>().fromStream(stream);
 
-        return new DAParameterList(parms);
+        return new DAParameterList(aparm);
     }
 
     private static final byte VERSION = 1;
